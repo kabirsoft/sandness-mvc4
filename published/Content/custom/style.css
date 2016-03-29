@@ -1,0 +1,932 @@
+
+
+.content-wrapper {    
+    max-width: 1800px !important;
+}
+/* for instillinger */
+#instillinger div{
+ margin: 10px;    
+}
+#instillinger div span{
+   padding-right: 14px;   
+}
+#instillinger div span a{
+    text-decoration: none;
+}
+
+#instillinger div span.change_pass_form:hover {
+    cursor: pointer;
+    background-color: transparent;
+    color: #000000;
+}
+#instillinger div span.change_email_form:hover {
+    cursor: pointer;
+    background-color: transparent;
+    color: #000000;
+    
+}
+
+#instillinger div.change_pass_form1{
+    display: none;
+}
+#instillinger div.change_email_form1{
+    display: none;
+}
+#instillinger form p.submit_pass{
+    margin-left: 140px;
+}
+#instillinger form p.submit_email{
+    margin-left: 99px;
+}
+/* ny Kunde */
+#nykunde{
+    width: auto;
+}
+#nykunde span.kunde{        
+    margin-right: 10px;
+    font-size: 25px;
+    font-weight: bold;
+}
+
+#nykunde span.plus{    
+    background-color: #808080;
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    padding-right:8px; 
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+.kundePro_with_letter{
+    background-color: #f0f0f0;
+    font-size: 22px;
+    font-weight: bold;
+    cursor: pointer;
+}
+#form-nyKunde{
+    display: none;
+}
+
+#formkunde div.ResubmissionError h3, #formkunde div.ResubmissionError{
+    color: red;
+}
+
+div.ResubmissionError h3, div.ResubmissionError{
+    color: red;
+}
+/* Infopages */
+#infopages{
+    margin-top: 12px;
+    line-height: 25px;
+}
+#infopages div.form_nyinfopage{
+    display: none;    
+}
+#infopages div span img{
+    padding-right: 10px;            
+}
+
+#infopages span.infopage_title{
+    font-size: 25px;
+    font-weight: bold;    
+}
+#infopages span.plus{
+    font-size: 30px;
+    font-weight: bolder;  
+    cursor: pointer;        
+}
+#infopages div.infopages_list{
+    margin-top: 14px;
+}
+#infopages div.infopages_list div span a:hover {
+ background-color: transparent;
+ color: #000000;
+}
+#infopages div span a{
+    text-decoration: none;
+}
+
+#bestillingsfelter_new span.plus{
+    font-size: 30px;
+    font-weight: bolder;  
+    cursor: pointer;        
+}
+
+/* Kunde list with first letter */
+
+#kunde_list span.kunde_A{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+
+div.kunde_start_with_A{
+    display: none;
+}
+
+#kunde_list span.kunde_B{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+     
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+
+div.kunde_start_with_B{
+    display: none;
+}
+
+#kunde_list span.kunde_C{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+
+div.kunde_start_with_C{
+    display: none;
+}
+
+#kunde_list span.kunde_D{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+
+div.kunde_start_with_D{
+    display: none;
+}
+
+#kunde_list span.kunde_E{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+
+div.kunde_start_with_E{
+    display: none;
+}
+
+#kunde_list span.kunde_F{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+
+div.kunde_start_with_F{
+    display: none;
+}
+
+#kunde_list span.kunde_G{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+
+div.kunde_start_with_G{
+    display: none;
+}
+
+#kunde_list span.kunde_H{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+
+div.kunde_start_with_H{
+    display: none;
+}
+
+#kunde_list span.kunde_I{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px;
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+
+div.kunde_start_with_I{
+    display: none;
+}
+#kunde_list span.kunde_J{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+
+div.kunde_start_with_J{
+    display: none;
+}
+#kunde_list span.kunde_K{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+
+div.kunde_start_with_K{
+    display: none;
+}
+#kunde_list span.kunde_L{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+
+div.kunde_start_with_L{
+    display: none;
+}
+#kunde_list span.kunde_M{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+
+div.kunde_start_with_M{
+    display: none;
+}
+#kunde_list span.kunde_N{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+div.kunde_start_with_N{
+    display: none;
+}
+
+#kunde_list span.kunde_O{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+div.kunde_start_with_O{
+    display: none;
+}
+#kunde_list span.kunde_P{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+div.kunde_start_with_P{
+    display: none;
+}
+#kunde_list span.kunde_Q{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+div.kunde_start_with_Q{
+    display: none;
+}
+#kunde_list span.kunde_R{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+div.kunde_start_with_R{
+    display: none;
+}
+#kunde_list span.kunde_S{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+div.kunde_start_with_S{
+    display: none;
+}
+#kunde_list span.kunde_T{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+div.kunde_start_with_T{
+    display: none;
+}
+#kunde_list span.kunde_U{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+div.kunde_start_with_U{
+    display: none;
+}
+#kunde_list span.kunde_V{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+div.kunde_start_with_V{
+    display: none;
+}
+#kunde_list span.kunde_W{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+div.kunde_start_with_W{
+    display: none;
+}
+#kunde_list span.kunde_X{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+div.kunde_start_with_X{
+    display: none;
+}
+#kunde_list span.kunde_Y{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+div.kunde_start_with_Y{
+    display: none;
+}
+#kunde_list span.kunde_Z{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+div.kunde_start_with_Z{
+    display: none;
+}
+
+#kunde_list span.kunde_AO{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+div.kunde_start_with_AO{
+    display: none;
+}
+
+#kunde_list span.kunde_AE{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+div.kunde_start_with_AE{
+    display: none;
+}
+
+#kunde_list span.kunde_OO{        
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+div.kunde_start_with_OO{
+    display: none;
+}
+
+ul li a{
+    text-decoration: none;
+    
+}
+ul li.user_under_customer{
+    padding-left: 25px;
+    list-style: none;
+    background-image: url(/images/innperson.png);
+    background-repeat: no-repeat;
+   height: 25px;
+}
+ul li.user_under_customer a{
+    text-decoration: none;
+}
+
+
+
+/* byggeplass */
+
+.table{
+    border : 1px solid #809FFF;
+    background-color: #E6FFFF;
+    color:  #6078BF;
+    border-collapse: collapse;
+}
+
+.header{
+    /*background-color: #6078BF;*/
+    background-color: #d3dce0;
+    color: white;
+    
+}
+
+.alternate{
+    background-color: #EEE6FF;
+}
+
+.edit_delete{
+    font-size: 10px;  
+}
+/*
+.header_byggeplass{
+ background-color: #d3dce0;    
+}
+    */
+/*
+
+#bestillinger_custom_grid table th{
+    font-size: 12px;        
+    border: 1px solid #CCCCCC;
+    background-color: #d3dce0;
+    padding: 8px 7px;
+}
+#bestillinger_custom_grid table td{
+    border-right: 0px solid #CCCCCC;
+    padding: 7px 7px;
+   
+    
+}
+
+#bestillinger_custom_grid table td a {
+text-decoration: none;
+}
+    
+#bestillinger_custom_grid table tbody tr td a:hover{
+background-color: transparent;
+color: #000000;
+}*/
+
+table thead th.orderid_th_st1,
+table thead th.ordangleg_th_st1,
+table thead th.orddato_th_st1
+{
+ cursor: pointer; 
+}
+
+#edit_bestillinger table th{
+    font-size: 14px;    
+    padding: 0 18px 0 0;
+    border: 1px solid #CCCCCC;
+    background-color: #d3dce0;
+    padding: 0 3px;
+}
+#edit_bestillinger table td{
+    border: 1px solid #CCCCCC;
+    padding-left: 7px;
+}
+
+
+#grid table th{
+    font-size: 14px;    
+    padding: 0 18px 0 0;
+    border: 1px solid #CCCCCC;
+    padding-left: 7px;
+    font-weight: 600;
+}
+#grid table td{    
+      border: 1px solid #CCCCCC;
+      padding-left: 7px;
+}
+#grid a.bygge_name{
+    text-decoration: none;    
+}
+
+#grid a.bygge_name:hover{
+    color: #000000;
+    background-color: transparent;
+}
+#grid a.bygge_id{
+    text-decoration: none;    
+}
+
+#grid a.bygge_id:hover{
+    color: #000000;
+    background-color: transparent;
+}
+/* new project, byggeplass */
+#newproject{
+    width: auto;
+}
+#newproject span.project{        
+    margin-right: 10px;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+#newproject span.plus{    
+    background-color: #808080;
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    padding-right:8px; 
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+#form-new-project{
+    display: none;
+}
+#bestillingsfelter_form{
+    display:none;
+}
+
+
+#contactForm .rmvEmail{
+    text-decoration: none;
+    font-size: 18px;
+    background-color: transparent;
+}
+
+/* Users / bruker */
+#newuser{
+    width: auto;
+}
+#newuser span.user{        
+    margin-right: 10px;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+#newuser span.plus{    
+    background-color: #808080;
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    padding-right:8px; 
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+#form-new-user{
+    display: none;
+}
+
+
+/* Admin user*/
+#newadministrator{
+    width: auto;
+}
+#newadministrator span.administrator{        
+    margin-right: 10px;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+#newadministrator span.plus{    
+    background-color: #808080;
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    padding-right:8px; 
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+#form-new-administrator{
+    display: none;
+}
+/* roller */
+#newroller{
+    width: auto;
+}
+#newroller span.roller{        
+    margin-right: 10px;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+#newroller span.plus{    
+    background-color: #808080;
+    font-size: 20px;
+    font-weight: bold;
+    padding-left:8px; 
+    padding-right:8px; 
+    padding-bottom: 3px;
+    cursor: pointer;
+}
+#form-new-roller{
+    display: none;
+}
+
+
+/* login form */
+ #login_form div.login_error p{
+ color: red;   
+}
+
+
+#forget_login a{
+    background-color: #D3DCE0;        
+    text-decoration: none;
+    
+}
+/* Footer */
+
+div.content-wrapper .float-left p a{
+    text-decoration: none;
+}
+
+
+
+/* for tabs */
+
+.ui-tabs .ui-tabs-nav {
+	list-style: none;
+	position: relative;
+	padding: 0;
+	margin: 0;
+}
+.ui-tabs .ui-tabs-nav li {
+	position: relative;
+	float: left;
+	margin: 0 3px -2px 0;
+	padding: 0;
+}
+.ui-tabs .ui-tabs-nav li a {
+	display: block;
+	padding: 10px 20px;
+	background: #f0f0f0;
+	border: 2px #ccc solid;
+	border-bottom-color: #ccc;
+	outline: none;
+}
+.ui-tabs .ui-tabs-nav li.ui-tabs-selected a {
+	padding: 10px 20px 12px 20px;
+	background: #fff;
+	border-bottom-style: none;
+}
+.ui-tabs .ui-tabs-nav li.ui-tabs-selected a,
+.ui-tabs .ui-tabs-nav li.ui-state-disabled a,
+.ui-tabs .ui-tabs-nav li.ui-state-processing a {
+	cursor: default;
+}
+.ui-tabs .ui-tabs-nav li a,
+.ui-tabs.ui-tabs-collapsible .ui-tabs-nav li.ui-tabs-selected a {
+	cursor: pointer;
+}
+.ui-tabs .ui-tabs-panel {
+	display: block;
+	clear: both;
+	border: 2px #ccc solid;
+	padding: 10px !important;
+}
+.ui-tabs .ui-tabs-hide {
+	display: none;
+}
+
+/*
+.ui-widget-header {
+ 
+  background-color: #d3dce0 !important;
+  border: 1px solid #cccccc !important;
+     
+ font-size: 1em !important;
+}*/
+
+.ui-widget {
+ font-size: 1em !important;
+}
+/* End tabs */
+#grid{    
+    overflow: scroll;
+}
+.ui-tabs {
+    /*width:1350px;*/
+}
+
+/* Bestillinger */
+/*
+#bestillinger_filter_form .bestillinger_date{
+    float: right;
+}*/
+.date-1{
+    background-color: #f7af39;
+    border-color: #cccccc;
+    color: #F0f0f0;
+}
+.date-2{
+    background-color: #f7af39;
+    border-color: #cccccc;
+    color: #F0f0f0;
+}
+.date-3{
+     background-color: #f7af39;
+    border-color: #cccccc;
+    color: #F0f0f0;
+}
+.date-4{
+    background-color: #f7af39;
+    border-color: #cccccc;
+    color: #F0f0f0;
+}
+.date-5{
+    background-color: #f7af39;
+    border-color: #cccccc;
+    color: #F0f0f0;
+}
+/*
+#bestillinger_filter_form .bestillinger_date button{
+    color: #1c94c4;
+    border-color: #cccccc;
+    text-transform:capitalize;
+}
+
+#bestillinger_filter_form .bestillinger_date button:hover{
+background-color: #98aeb8;    
+
+}*/
+#bestillinger_filter_form .bestillinger_date button
+{
+    text-transform:capitalize;
+}
+
+#bestillinger_filter_form table tr td.kunde_filter_width{
+    width: 50px;    
+}
+#bestillinger_filter_form table tr td .vis_alle_bestilliner{
+    border-color: #CCCCCC;
+    color: #1C94C4; 
+}
+.btn_bestilling{
+    border-color: #CCCCCC !important;
+    color: #1C94C4; 
+}
+
+#nybestilling_form
+{
+    line-height: 3.0em;
+}
+
+
+/*
+#nybestilling_form div span.input_nybestilling { 
+    padding-top: 30px;   
+    white-space: nowrap;    
+}
+#nybestilling_form div span label.nybestilling_lbl { 
+    padding-top: 10px;   
+}*/
+
+/* bestillingsfelter */
+#bestillingsfelter {
+  border: 1px solid black;
+  border-collapse: collapse;
+  background-color: red;    
+}
+
+#bestillingsfelter_new span {
+   font-size: 18px;
+   font-weight: bold;
+}
+
+
+#bestillingsfelter_new span a{
+    font-size: 22px;
+   font-weight: bold;
+   text-decoration: none;
+}
+/* Bestillinger paging */
+ul.pagination .page_status1{
+    text-decoration: none;    
+    font-weight: bold;    
+    background-color:#d3dce0; 
+}
+ul.pagination .page_status2{
+    text-decoration: none;
+     font-weight: bold; 
+     background-color:#d3dce0 !important; 
+}
+ul.pagination .page_status3{
+    text-decoration: none;
+     font-weight: bold; 
+     background-color:#d3dce0 !important; 
+}
+
+ul.pagination li:first-child a{
+     font-weight: bolder;        
+     background-color:#d3dce0;         
+}
+
+/* Instilligner for editor, change passwd and email */
+
+
+/* overwrite theme */
+#body {
+    background-color: #FFFFFF;
+}
+
+
+/* start overwrite Bootstrap */
+/*.navbar-default .navbar-nav>.active>a, .navbar-default .navbar-nav>.active>a:hover, .navbar-default .navbar-nav>.active>a:focus,*/
+
+/*
+.nav-pills>li.active>a , .nav-pills>li.active>a, .nav-pills>li.active>a:hover, .nav-pills>li.active>a:focus{
+    text-decoration : none;
+    color: #000000;
+    font-weight:bolder;
+    background-color: transparent;
+    border-bottom : 4px solid #000;
+    border-radius: 0px; 
+    padding: 10px 2px 6px 2px;       
+}
+    */
+
+#nybestilling_form .form-inline .form-control {
+    width: 25%;
+    margin-left: 2%;
+
+}
+#nybestilling_form   label{
+    font-size:14px;
+}
+#nybestilling_form div.col-sm-10 {
+width: 82.333333%;
+}
+#bestillinger_filter_form .form-inline .form-control{
+    width:50%;
+    margin-left: 2%;
+}
+#bestillinger_filter_form .well,
+#nybestilling_form .well{
+    background-color:transparent;
+    border:0px;
+}
+
+#login_form .panel {
+    width: 35%;
+}
+
+#login_form .icon-style{
+    background-color:#FFF; 
+    padding:8px;
+}
+
+
+

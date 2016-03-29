@@ -1,0 +1,68 @@
+﻿@model sandness_mvc4.Models.Roller.RollerViewModel
+@using System.Web.Mvc;
+@using sandness_mvc4.Models.Diplo;
+@using sandness_mvc4.Models.Roller;
+@using NotWebMatrix.Data;
+
+@{    
+   Page.Title = "Endre Roller";         
+}
+
+@using (Html.BeginForm("Edit", "Roller", FormMethod.Post, new { id = "contactForm1", role = "form" }))
+{
+		<fieldset>
+			<legend>Endre roller</legend>
+             <dl>
+				<dt>
+					<label for="rollers_name">Rolle*</label>
+				</dt>
+				<dd>
+					<input type="text" id="rollers_name" class="required" name="Name" value="@Model.Name"  maxlength="255" />
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="rollers_new">Ny bestilling:</label>	
+                </dt>
+				<dd>
+                    @{
+                    var checkYa = "";
+                    var checkNo = "";
+                    if( @Model.New == 1 ){
+                        checkYa= "checked";
+                        }else{
+                            checkNo = "checked";
+                        }
+                    } 
+					<input type="radio" name="new" @checkYa value=1 /> Ya <br />
+                    <input type="radio" name="new" @checkNo value=0 /> Nei 
+                    
+                    
+			   </dd>
+            </dl>
+            <dl>
+				<dt>
+                    <label for="rollers_edit"> Endre bestillinge: </label>
+                 </dt>			
+				 <dd> 
+                    @{
+                        checkYa = "";
+                        checkNo = "";
+                       
+                    if( @Model.Edit == 1 ){
+                        checkYa= "checked";
+                        }else{
+                            checkNo = "checked";
+                        }
+                    } 
+                     
+                    <input type="radio"  name="edit" @checkYa value=1 /> Ya  <br />
+                    <input type="radio" name="edit" @checkNo value=0  /> Nei  
+                 </dd>
+			 </dl>
+         </fieldset>
+		<div>
+			<input type="submit" name="submit-button" value="Submit" class="button" />
+		</div>
+}

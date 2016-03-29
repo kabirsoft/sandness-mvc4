@@ -1,0 +1,24 @@
+﻿@model sandness_mvc4.Models.Infopage.TextCodesViewModel
+@using System.Web.Mvc;
+
+@{    
+   Page.Title = "Edit Infopages";      
+}
+
+           
+ @using (Html.BeginForm("Edit", "Infopages", FormMethod.Post, new { role = "Form" }))
+ {
+      <input type="hidden" name="infopagesId" value="@Model.InfopagesId">
+        <dl>
+          <dt>
+              Title
+           </dt>
+            <dd>
+                  <input type="text" name="t_val" value="@Model.t_val">
+            </dd>
+            <dt> Tekst  </dt>             
+                 <dd><textarea name="infoPaegView.Text"  rows="5" cols="57"> @Model.infoPaegView.Text </textarea>   </dd>                   
+         </dl>
+         <span style="margin-left: 295px;"> <input type="button" value="backto infopages" onclick="window.location.href = '/infopages/Index'" > </span> 
+         <span style="margin-left: 2px;"><input type="submit" name="edit_infopages" value="Oppdater"> </span>
+ }  

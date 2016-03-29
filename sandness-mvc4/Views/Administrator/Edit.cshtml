@@ -1,0 +1,164 @@
+﻿@model sandness_mvc4.Models.users.userFormModel
+@using System.Web.Mvc;
+@using System.Collections;
+@using sandness_mvc4.Models.Diplo;
+@using sandness_mvc4.Models.users;
+@using System.Net.Mail;
+@using NotWebMatrix.Data;
+
+ @{    
+    Page.Title = "Administrator";      
+   var db = Database.Open("SolaBetong");    
+ }
+
+
+
+
+
+@{
+    var usergroup = ByggeplassRepository.getUserGroup();
+    var kunder = ByggeplassRepository.GetKunde();
+    var projects = ByggeplassRepository.GetProjectsWithUserIdCustId(@Model.Id, @Model.customerId);
+    var roller = ByggeplassRepository.getrolle();
+    var selected = "";
+    var checked_pro = "";
+ }  
+  @using (Html.BeginForm("Edit", "Administrator", FormMethod.Post, new { id = "AdministratorForm", role = "form" }))
+  {	
+		<fieldset>
+			<legend>Administrator</legend>
+             <dl>
+				<dt>					
+                    @Html.LabelFor(m => m.FirstName)
+				</dt>
+				<dd>
+					@Html.TextBoxFor(m => m.FirstName, new { id="FirstName", Name="FirstName", Class="required"} )
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					@Html.LabelFor(m=>m.LastName)
+				</dt>
+				<dd>
+					@Html.TextBoxFor(m => m.LastName, new { id="LastName", Name="LastName"} )
+				</dd>
+			</dl>
+			
+			<dl>
+				<dt>
+					@Html.LabelFor(m=>m.Email)
+				</dt>
+				<dd>
+					@Html.TextBoxFor(m => m.Email, new { id="u_mail", Name="Email", Class="required"} )
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					@Html.LabelFor(m=>m.Mobile)
+				</dt>
+				<dd>
+					@Html.TextBoxFor(m => m.Mobile, new { id="u_phone", Name="Mobile" } )
+				</dd>
+			</dl>
+            
+            <dl>
+				<dt>
+					<label for="UserGroup">Gruppe : Administrators</label>
+				</dt>
+				<dd>                    
+                    <input type="hidden"  name="UserGroupId" value="1">                                         
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="Password">Passord*</label>
+				</dt>
+				<dd>
+					<input type="password" id="u_pass" class="required" name="Password" value="" maxlength="255" />
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="con_password">Gjenta Passord*</label>
+				</dt>
+				<dd>
+					<input type="password" id="con_password" class="required" name="con_password" value="" maxlength="255" />
+				</dd>
+			</dl>
+             <dl>
+				<dt>
+					<label for="u_company_name">Kunder</label>
+				</dt>
+				<dd>
+                    <!-- select id="u_company_name" name="CustomerId" onchange="window.location.href = '/Users/index/?customerId=' + $(this).val();" -->	
+                    <select id="u_company_name" name="CustomerId">                        				
+                        <option value="-1"> - Select   kunde -</option> 						
+						@foreach (var kunde in kunder)
+                          {
+                              if (@Model.customerId == @kunde.Id)
+                              {
+                                  selected = "selected";
+                              }
+                              else
+                              {
+                                  selected = "";
+                              }                        
+							<option @selected value="@kunde.Id">@kunde.Name </option> 
+                          } 						
+						
+					</select>
+				</dd>
+			</dl>	
+
+              <dl>
+				<dt>
+					<label for="project">Projekter</label>
+                    @if( @projects != null) 
+                    {
+                        foreach (var project in projects)
+                        {                            
+                            <input type="checkbox"  id="project_@project.Id"  name="project_@project.id" value="" maxlength="255"> @project.name <br />
+                        }
+                    }
+				</dt>
+				<dd>
+				   
+                </dd>
+			</dl>
+             <dl>
+				<dt>
+					<label for="u_rolle">Rolle</label>
+				</dt>
+				<dd>
+					<select id="u_rolle" name="rollId">
+                         @foreach (var rolle in roller)
+                         {
+                             if (@Model.rollId == rolle.id)
+                             {
+                                 selected = "selected";
+                             }
+                             else
+                             {
+                                 selected = "";
+                             }
+                                                         
+							<option  @selected value="@rolle.Id"> @rolle.Name</option>
+                         }						
+						
+					</select>
+				</dd>
+			</dl>
+            
+		</fieldset>
+		<div>
+			<input type="submit" name="submit-button" value="Submit" class="button" />
+		</div>
+	
+}
+
+
+

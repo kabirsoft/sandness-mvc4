@@ -1,0 +1,183 @@
+﻿@model sandness_mvc4.Models.Byggeplass.ByggeplassViewModel
+@using System.Web.Mvc;
+@using System.Web.Helpers;
+@using System.Collections;
+@using sandness_mvc4.Models.Diplo;
+@using sandness_mvc4.Models.Byggeplass;
+@using NotWebMatrix.Data;
+
+@{     
+     Page.Title = "Opprette project"; 
+     var db = Database.Open("SolaBetong");     
+}
+
+
+
+
+<!-- div id="endre_projekter"> 
+    @*    
+    @{
+	    bool isPostBack = !String.IsNullOrEmpty(Request.Form["submit-button"]);
+	    var formModel = new ProjectFormModel();
+
+	    if (!isPostBack)
+	    {         
+		    Session.Remove(ProjectFormModel.SessionKey);	                              
+                @RenderForm(formModel)           
+	    }
+	    else
+	    {
+		    if (Session[ProjectFormModel.SessionKey] != null)
+		    {
+			    @DisplayResubmissionError()
+			    return;
+		    }
+            
+		    formModel = new ProjectFormModel(Request.Form);
+		    var errors = formModel.Validate();
+
+		    if (errors.Count > 0)
+		    {	
+			    @DisplayErrors(errors)
+			    @RenderForm(formModel)
+		    }
+		    else
+		    {
+                // Update database
+               
+                /*
+                @formModel.u_company
+                @formModel.pro_name
+                @formModel.pro_adres
+                @formModel.pro_adresinfo
+                @formModel.pro_num
+                //<p> var added_email =@Request.Form["added_email"]</p>
+                */
+              
+                 @DisplayCompletionMessage(formModel);
+                 var now = DateTime.Now;
+                 //var weekDay = DateTime.Now.DayOfWeek;
+                 var timestamp= ByggeplassRepository.ToUnix(@now);
+                 db.Execute("UPDATE [sandness].[dbo].[projects] SET name=@0, adres=@1, adresinfo=@2, num=@3, uid=@4  WHERE id=@5", @formModel.pro_name, @formModel.pro_adres, @formModel.pro_adresinfo, @formModel.pro_num, @formModel.u_company, ViewBag.ProjectID);
+                
+                 foreach(var i in Request.Form.AllKeys){
+                   if(@i.Length > 7){
+                     if(@i.Substring(0,7) == "prmail_"){
+                        <p> @Request[@i] </p>
+                        /*
+                        var pos = @i.IndexOf('_') +1;
+                        
+                        var len = @i.Length - 1;
+                        <p> pos: @pos</p>
+                        <p> len: @len</p>
+                         <p> var emailId: @i.Substring(7,8) </p>
+                         */
+                         foreach(var eid in @i.Split('_')){
+                            if(@eid.IsInt()){                                
+                                ByggeplassRepository.Projects_emails_update( @Request[@i], @eid);
+                            }    
+                         }  
+                     }
+                   }
+                 }
+                 var timestamp1= ByggeplassRepository.ToUnix(@now);
+                 if( !string.IsNullOrEmpty(@Request.Form["added_email"])){
+                    <p> Email add: </p>
+                    foreach (var email in @Request.Form["added_email"].Split(',')){
+                        <p>@email</p>
+                        db.Execute("INSERT INTO [sandness].[dbo].[pr_mails] (created, pr_id, mail) values(@0, @1, @2)", @timestamp1, @ViewBag.ProjectID, @email);                    
+                    }
+                 }
+                 <span> <input type="button" value="backto project page" onclick="window.location.href = '/Byggeplass/index'" > </span> 
+            }
+	    }
+    }
+    *@
+  </!-->
+
+@{     
+    var kunder = ByggeplassRepository.GetKunde();
+    var pr_emails = ByggeplassRepository.Projects_emails(Convert.ToInt32( @Model.Id ) );   
+    var selected = "";
+  }
+    
+<form id="contactForm" action="" method="post">
+		
+    <fieldset>
+			<legend>Edit projekt</legend>
+			
+			<dl>
+				<dt>
+					<label for="u_company">Kunde</label>
+				</dt>
+				<dd>
+                    <select id="u_company" name="u_company">
+                        <option value="-1"> - Select   kunde -</option> 						
+						@foreach( var kunde in kunder )
+						{     
+                            if( @Model.CustomerId == kunde.Id){selected="selected";}else{selected = ""; }                       
+							<option value="@kunde.Id" @selected>@kunde.Name </option> 
+						}
+					</select>
+				</dd>
+			</dl>
+            <dl>
+				<dt>
+					<label for="pro_name">Prosjektnavn*</label>
+				</dt>
+				<dd>
+					<input type="text" id="pro_name" class="required pro_name" name="Name" value="@Model.Name" maxlength="255" />
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="pro_adres">Adresse*</label>
+				</dt>
+				<dd>
+					<input type="text" id="pro_adres" class="required pro_adres" name="Address" value="@Model.Address" maxlength="255" />
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="pro_num">Prosjektnummer</label>
+				</dt>
+				<dd>
+					<input type="text" id="pro_num" class="pro_num" name="ProjectNumber" value="@Model.ProjectNumber" maxlength="255" />
+				</dd>
+			</dl>
+            <dl>
+				<dt>
+					<label for="pro_adresinfo">City</label>
+				</dt>
+				<dd>
+					<input type="text" id="pro_adresinfo"  name="City" value="@Model.City"  maxlength="255" />
+				</dd>
+			</dl>
+           <dl>
+               <dt>
+					<label> Email  </label>
+				</dt>
+        
+         @{
+                if( @pr_emails.Count() > 0 ){
+                    foreach(var email in @pr_emails){
+                        <dd>
+                           <input type="text" id="@email.id" class="required email"  name="prmail_@email.Id" value="@email.Email">  <a type="button"   class="rmvEmail"   href="@Href("/Byggeplass/DeleteEmail/"+ Model.Id + "/" + @email.Id )" onclick="return confirm('Are u sure to delete : @email.Email ??')"> Remove</a>
+                        </dd>
+                    }
+                }
+            }
+               </dl>
+           <div class="buttons">
+             <input type="button" class="btnAdd" value="Add Email"><br>
+            </div>
+		</fieldset>
+		<div>
+			<input type="submit" name="submit-button" value="Submit" class="button" />
+		</div>
+	</form>
+
+
+

@@ -1,0 +1,144 @@
+﻿@model sandness_mvc4.Models.BestillingsFelter.BestillingsFelterViewModel
+@using System.Web.Mvc;
+@using sandness_mvc4.Models.Diplo;
+@using sandness_mvc4.Models.Nybestilling;
+@using Conversive.PHPSerializationLibrary;
+@using System.Collections;
+@using System.Web.Helpers;
+@using NotWebMatrix.Data;
+
+@{    
+    Page.Title = "Bestillingsfelter";      
+   var db = Database.Open("SolaBetong");       
+   /*
+    if( Session["username"] == null ) {
+           Response.Redirect("~/login/index");
+    }
+    */   
+ }
+
+@{
+if(! String.IsNullOrEmpty( Request.QueryString["id_foruser"] ) ){    
+    var change_val=1;                                               
+    var foruser_val =  db.QueryValue( "SELECT foruser FROM [SolaBetong].[dbo].[felters] WHERE id=" +@Request.QueryString["id_foruser"] );    
+    if( @foruser_val ==1 ){
+        change_val =0;
+    }    
+    db.Execute("UPDATE [SolaBetong].[dbo].[felters] set foruser=@0 WHERE id=@1", @change_val, @Request.QueryString["id_foruser"]);
+ }
+   
+if(! String.IsNullOrEmpty( Request.QueryString["id_fortable"] ) ){
+    
+    var change_val=1;
+    var fortable_val = db.QueryValue("SELECT fortable FROM [SolaBetong].[dbo].[felters] WHERE id=" + @Request.QueryString["id_fortable"]);    
+    if( @fortable_val ==1 ){
+        change_val =0;
+    }
+    db.Execute("UPDATE [SolaBetong].[dbo].[felters] set fortable=@0 WHERE id=@1", @change_val, @Request.QueryString["id_fortable"]);
+ }  
+ 
+ if(! String.IsNullOrEmpty( Request.QueryString["del_id"] ) ){
+     db.Execute("DELETE FROM [SolaBetong].[dbo].[felters] WHERE id=@0", @Request.QueryString["del_id"]);
+     Response.Redirect("/Bestillingsfelter/index/");
+ }
+  
+  if(! String.IsNullOrEmpty( Request.QueryString["move_down"] ) ){
+
+      var move_values1 = db.QueryValue("SELECT ord FROM [SolaBetong].[dbo].[felters] WHERE id=@0 Order by ord DESC", @Request.QueryString["move_down"]);
+    
+    var curr_ord = move_values1;
+    var curr_id  = @Request.QueryString["move_down"];
+    var move_values2 = db.QuerySingle("SELECT * FROM [SolaBetong].[dbo].[felters] where ord <=@0 ORDER BY ord DESC OFFSET  1 ROWS FETCH next 1 ROWS ONLY", @move_values1);
+     
+     var next_ord = move_values2.ord;
+     var next_id  = move_values2.id;
+
+     db.Execute("UPDATE [SolaBetong].[dbo].[felters] set ord=@0 WHERE id=@1", @next_ord, @curr_id);
+     db.Execute("UPDATE [SolaBetong].[dbo].[felters] set ord=@0 WHERE id=@1", @curr_ord, @next_id);
+      Response.Redirect("/Bestillingsfelter/index/");    
+ }
+ 
+  if(! String.IsNullOrEmpty( Request.QueryString["move_up"] ) ){
+
+      var move_values1 = db.QueryValue("SELECT ord FROM [SolaBetong].[dbo].[felters] WHERE id=@0 Order by ord DESC", @Request.QueryString["move_up"]);
+    
+    var curr_ord = move_values1;    
+    var curr_id  = @Request.QueryString["move_up"];
+
+    var move_values2 = db.QuerySingle("SELECT * FROM [SolaBetong].[dbo].[felters] where ord >=@0 ORDER BY ord ASC OFFSET  1 ROWS FETCH next 1 ROWS ONLY", @move_values1);    
+    
+    var prev_ord = move_values2.ord;
+    var prev_id  = move_values2.id;
+
+
+    db.Execute("UPDATE [SolaBetong].[dbo].[felters] set ord=@0 WHERE id=@1", @curr_ord, @prev_id);
+    db.Execute("UPDATE [SolaBetong].[dbo].[felters] set ord=@0 WHERE id=@1", @prev_ord, @curr_id);    
+     Response.Redirect("/Bestillingsfelter/index/");
+   
+ } 
+
+var formfields = ByggeplassRepository.getFormfield(); 
+var selected_foruser="";
+var selected_fortable="";
+var i=1;
+
+
+/*
+foreach ( var field in formfields )
+{                            
+  //<p>@field.id - @field.type -  @field.name - @field.ord  - @field.foruser</p>
+}
+*/
+ 
+<div id="bestillingsfelter_new">
+    <span> @Page.Title </span> <span class="plus"> + </span>      
+</div>
+<div id="bestillingsfelter_form"> 
+  @using (Html.BeginForm("Index", "Bestillingsfelter", FormMethod.Post, new { id = "", role = "form" }))       
+  {
+        <p><input type="text" name="Name"> Navn</p>
+        <p> Type </p>
+        <p> <input style="width: 30px;" type="radio" name="Type" value="1" /> Teksfelt </p>
+        <p> <input style="width: 30px;" type="radio" name="Type" value="2" /> Nedtrekksfelt </p>
+        <p> <input style="width: 30px;" type="radio" name="Type" value="3" /> Radioknapper </p>
+        <p> <input  type="submit" name="submit" value="Lagre" /></p>
+  }
+</div>
+ <table style="border: 1px solid #cccccc; text-align: left">
+    <thead style="background-color: #d3dce0">
+        <tr><th> </th> <th> </th> <th> </th> <th> </th> <th> </th> <th style="padding-right: 8px; padding-left:4px;border: 1px solid #cccccc;"> In bestilling </th > <th style="border: 1px solid #cccccc;padding-right: 8px;padding-left: 4px;"> Bestillingstabelle </th></tr>
+    </thead>
+     @foreach (var field in formfields)
+     { 
+       <tr>
+            <td style="border: 1px solid #cccccc; padding-left: 6px;"> @field.name </td> 
+           @if (i == 1)
+           {
+               <td style="border: 1px solid #cccccc;padding-left: 6px;">   </td> 
+           }
+           else
+           {
+            <td style="border: 1px solid #cccccc;padding-left: 6px;"> <a href="/Bestillingsfelter/index/?move_up=@field.id" > <span class="glyphicon glyphicon-arrow-up"></span>  </a>   </td> 
+           }
+           
+           @if (i == @formfields.Count())
+           {
+               <td style="border: 1px solid #cccccc;padding-left: 6px;">   </td> 
+           }
+           else
+           {
+            <td style="border: 1px solid #cccccc;padding-left: 6px;"> <a href="/Bestillingsfelter/index/?move_down=@field.id" ><span class="glyphicon glyphicon-arrow-down"> </span></a>  </td> 
+           }           
+           <td style="border: 1px solid #cccccc;padding-left: 6px;"> <input type="button" onclick="window.location.href='/Bestillingsfelter/index/?del_id=@field.id'" value="Delete"/>  </td>           
+           <td style="border: 1px solid #cccccc;padding-left: 6px;"> <input type="button" onclick="window.location.href='/Bestillingsfelter/Bestillingsfelter_edit/?id=@field.id&type=@field.type'" value="Rediger"/> </td> 
+                    
+           @if (@field.foruser == 1) { selected_foruser = "checked"; } else { selected_foruser = ""; } 
+           <td style="border: 1px solid #cccccc;padding-left: 6px;"> <input type="checkbox" @selected_foruser name="foruser_@field.id"  onchange="window.location.href='/Bestillingsfelter/index/?id_foruser=@field.id'" /> </td> 
+            
+           @if (@field.fortable == 1) { selected_fortable = "checked"; } else { selected_fortable = ""; } 
+           <td style="border: 1px solid #cccccc;padding-left: 6px;"> <input type="checkbox" @selected_fortable  name="fortable_@field.id"  onchange="window.location.href='/Bestillingsfelter/index/?id_fortable=@field.id'" /> </td>
+       </tr>
+           i++;
+     }
+ </table>
+}

@@ -1,0 +1,79 @@
+﻿@model sandness_mvc4.Models.BestillingsFelter.BestillingsFelterViewModel
+@using System.Web.Mvc;
+@using sandness_mvc4.Models.Diplo;
+@using sandness_mvc4.Models.Nybestilling;
+@using Conversive.PHPSerializationLibrary;
+@using System.Collections;
+@using System.Web.Helpers;
+@using NotWebMatrix.Data;
+
+
+
+@{
+    Page.Title = "Bestillingsfelter";      
+    var db = Database.Open("SolaBetong"); 
+    var formfields = ByggeplassRepository.getFormfield(); 
+    var selected_foruser="";
+    var selected_fortable="";
+    var i=1;
+
+
+/*
+foreach ( var field in formfields )
+{                            
+  //<p>@field.id - @field.type -  @field.name - @field.ord  - @field.foruser</p>
+}
+*/
+ 
+<div id="bestillingsfelter_new">
+    <span> @Page.Title </span> <span class="plus"> + </span>      
+</div>
+<div id="bestillingsfelter_form"> 
+  @using (Html.BeginForm("Index", "Bestillingsfelter", FormMethod.Post, new { id = "", role = "form" }))       
+  {
+        <p><input type="text" name="Name"> Navn</p>
+        <p> Type </p>
+        <p> <input style="width: 30px;" type="radio" name="Type" value="1" /> Teksfelt </p>
+        <p> <input style="width: 30px;" type="radio" name="Type" value="2" /> Nedtrekksfelt </p>
+        <p> <input style="width: 30px;" type="radio" name="Type" value="3" /> Radioknapper </p>
+        <p> <input  type="submit" name="submit" value="Lagre" /></p>
+  }
+</div>
+ <table style="border: 1px solid #cccccc; text-align: left">
+    <thead style="background-color: #d3dce0">
+        <tr><th> </th> <th> </th> <th> </th> <th> </th> <th> </th> <th style="padding-right: 8px; padding-left:4px;border: 1px solid #cccccc;"> In bestilling </th > <th style="border: 1px solid #cccccc;padding-right: 8px;padding-left: 4px;"> Bestillingstabelle </th></tr>
+    </thead>
+     @foreach (var field in formfields)
+     { 
+       <tr>
+            <td style="border: 1px solid #cccccc; padding-left: 6px;"> @field.name </td> 
+           @if (i == 1)
+           {
+               <td style="border: 1px solid #cccccc;padding-left: 6px;">   </td> 
+           }
+           else
+           {
+            <td style="border: 1px solid #cccccc;padding-left: 6px;"> <a href="/Bestillingsfelter/Move_Up/@field.id" > <span class="glyphicon glyphicon-arrow-up"></span>  </a>   </td> 
+           }
+           
+           @if ( i == @formfields.Count() )
+           {
+               <td style="border: 1px solid #cccccc;padding-left: 6px;">   </td> 
+           }
+           else
+           {
+            <td style="border: 1px solid #cccccc;padding-left: 6px;"> <a href="/Bestillingsfelter/Move_Down/@field.id" ><span class="glyphicon glyphicon-arrow-down"> </span></a>  </td> 
+           }           
+           <td style="border: 1px solid #cccccc;padding-left: 6px;"> <a  class="btn btn-danger  BestillingsfelterDelete" data-name="@field.name" data-id="@field.id" href="/Bestillingsfelter/Delete/@field.id" >Delete</a>  </td>           
+           <td style="border: 1px solid #cccccc;padding-left: 6px;"> <a class="btn btn-default" href="/Bestillingsfelter/Edit/@field.id" > Rediger </a> </td> 
+                    
+           @if (@field.foruser == 1) { selected_foruser = "checked"; } else { selected_foruser = ""; } 
+           <td style="border: 1px solid #cccccc;padding-left: 6px;"> <input type="checkbox" @selected_foruser name="foruser_@field.id"  onchange="window.location.href='/Bestillingsfelter/ForNybestilling/@field.id'" /> </td> 
+            
+           @if (@field.fortable == 1) { selected_fortable = "checked"; } else { selected_fortable = ""; } 
+           <td style="border: 1px solid #cccccc;padding-left: 6px;"> <input type="checkbox" @selected_fortable  name="fortable_@field.id"  onchange="window.location.href='/Bestillingsfelter/ForBestilling/@field.id'" /> </td>
+       </tr>
+           i++;
+     }
+ </table>
+}

@@ -1,0 +1,147 @@
+﻿@using System.Web.Mvc;
+@using sandness_mvc4.Models.Diplo;
+@using sandness_mvc4.Models.Nybestilling;
+@using Conversive.PHPSerializationLibrary;
+@using System.Collections;
+@using System.Web.Helpers;
+@using NotWebMatrix.Data;
+
+@{    
+    Page.Title = "Felt";      
+   var db = Database.Open("sandness");    
+   
+   /*
+    if( Session["username"] == null ) {
+           Response.Redirect("~/login/login");
+    }
+    */
+  
+
+     
+        //<p> Rediger: @ViewBag.rediger_id </p>     
+        //<p> type: @ViewBag.type </p>
+   
+
+
+     var textvalue= db.QueryValue("SELECT name FROM [sandness].[dbo].[felters] WHERE id=@0", @ViewBag.rediger_id );
+     var i=1;
+     var get_radio = db.Query("SELECT * FROM choices WHERE feltid=@0 ORDER BY ord DESC", @ViewBag.rediger_id);
+}
+<h3> @Page.Title </h3>
+
+@*  Add new radio *@
+@if( ! String.IsNullOrEmpty(Request.Form["submit-radio"] )) {    
+  
+  if( ! String.IsNullOrEmpty(Request.Form["add_radio"] )){  
+      var ord_val=db.QuerySingle("SELECT TOP 1 * FROM [sandness].[dbo].[choices] WHERE feltid=@0 Order by ord DESC", @ViewBag.rediger_id );      
+      var ord_val_last = 1;
+      if( @ord_val != null ){         
+          ord_val_last = Convert.ToInt32( @ord_val.ord ) +1;
+      }    
+    
+     var now = DateTime.Now;
+     var timestamp= ByggeplassRepository.ToUnix(@now);
+     db.Execute("INSERT INTO [sandness].[dbo].[choices] ( name,feltid,created,default1, ord ) VALUES (@0,@1,@2,@3,@4)",  Convert.ToString(@Request.Form["add_radio"]) , @ViewBag.rediger_id, @timestamp, 0, @ord_val_last);   
+   }
+   // update radio text
+   db.Execute("Update [sandness].[dbo].[felters] set name=@0 WHERE id=@1", @Request.Form["txt_radio"] ,@ViewBag.rediger_id);
+   Response.Redirect("/Bestillingsfelter/Bestillingsfelter_edit/?rediger_id=" + @Request.QueryString["rediger_id"] + "&type=" + @ViewBag.type);
+}
+
+@* Delete radio *@
+@if(! String.IsNullOrEmpty(Request.QueryString["del_radio"] )){    
+     db.Execute("DELETE FROM [sandness].[dbo].[choices] WHERE id=@0",  @Request.QueryString["del_radio"]);
+     Response.Redirect("/Bestillingsfelter/Bestillingsfelter_edit/?rediger_id=" + @Request.QueryString["rediger_id"] + "&type=" + @ViewBag.type);
+}
+
+@* for text field *@
+@if(! String.IsNullOrEmpty(Request.Form["name_edit"] )){
+    db.Execute("Update [sandness].[dbo].[felters] set name=@0 WHERE id=@1", @Request.Form["name_edit"] ,@ViewBag.rediger_id);
+    Response.Redirect("/Bestillingsfelter/Index/");
+}
+
+@* move down *@
+@if(! String.IsNullOrEmpty(Request.QueryString["move_down"] )){
+
+    var move_values1=db.QueryValue("SELECT ord FROM [sandness].[dbo].[choices] WHERE id=@0 Order by ord DESC", @Request.QueryString["move_down"] );
+    //var move_values1 = db.QueryValue("SELECT ord FROM [sandness].[dbo].[choices] WHERE id=@0 Order by ord DESC", @ViewBag.rsID);
+    var curr_ord = move_values1;
+    var curr_id  = @Request.QueryString["move_down"];
+    var move_values2 = db.QuerySingle("SELECT * FROM [sandness].[dbo].[choices] where feltid=@0 and ord <=@1 ORDER BY ord DESC OFFSET  1 ROWS FETCH next 1 ROWS ONLY", @ViewBag.rediger_id, @move_values1);
+    
+    var next_ord = move_values2.ord;
+    var next_id  = move_values2.id;
+     
+    db.Execute("UPDATE [sandness].[dbo].[choices] set ord=@0 WHERE id=@1",@next_ord,@curr_id);
+    db.Execute("UPDATE [sandness].[dbo].[choices] set ord=@0 WHERE id=@1",@curr_ord,@next_id);
+    Response.Redirect("/Bestillingsfelter/Bestillingsfelter_edit/?rediger_id=" + @Request.QueryString["rediger_id"] + "&type=" + @ViewBag.type);
+ }
+
+@* move up *@
+@if(! String.IsNullOrEmpty( Request.QueryString["move_up"] )){
+ 
+    var move_values1=db.QueryValue("SELECT ord FROM [sandness].[dbo].[choices] WHERE id=@0 Order by ord DESC", @Request.QueryString["move_up"] );    
+    var curr_ord = move_values1;
+    var curr_id  = @Request.QueryString["move_up"];
+    var move_values2 = db.QuerySingle("SELECT * FROM [sandness].[dbo].[choices] where feltid=@0 and ord >=@1 ORDER BY ord ASC OFFSET  1 ROWS FETCH next 1 ROWS ONLY",@ViewBag.rediger_id, @move_values1);
+    
+    var next_ord = move_values2.ord;
+    var next_id  = move_values2.id;
+     
+    db.Execute("UPDATE [sandness].[dbo].[choices] set ord=@0 WHERE id=@1",@next_ord,@curr_id);
+    db.Execute("UPDATE [sandness].[dbo].[choices] set ord=@0 WHERE id=@1",@curr_ord,@next_id);
+    Response.Redirect("/Bestillingsfelter/Bestillingsfelter_edit/?rediger_id=" + @ViewBag.rediger_id + "&type=" + @ViewBag.type);      
+}
+
+<p style="display:none">@Request.QueryString["type"] = @ViewBag.type;</p>
+@switch( Convert.ToInt32( @Request.QueryString["type"] ) ){
+      case 1: 
+               
+         <form method="post">
+             <input type="text" name="name_edit" value="@textvalue">
+             <p>Type: Tekstfelt</p>
+             <input type="submit"  name="submit-text" value="Lagre">
+         </form>
+      break;
+
+      case 3:
+      <form method="post">
+             <input type="text" name="txt_radio" value="@textvalue">
+             <p> Type: Radioknapper </p>
+       <table style="border: 1px solid #cccccc; text-align: left">
+       <thead >
+       <tr>
+          <th style="border: 1px solid #cccccc;padding-left: 6px;">Valgmulighet</th> <th style="border: 1px solid #cccccc;padding-left: 6px;"> Default </th> <th style="border: 1px solid #cccccc;padding-left: 6px;"> </th> <th style="border: 1px solid #cccccc;padding-left: 6px;"> </th>  <th style="padding-right: 8px; padding-left:4px;border: 1px solid #cccccc;"> Slett </th > 
+       </tr>
+       </thead>
+
+        @foreach( var rs in get_radio ){         
+            <tr>
+                <td style="border: 1px solid #cccccc;padding-left: 6px;"> @rs.name </td> 
+                <td style="border: 1px solid #cccccc;padding-left: 6px;"> <input type="radio" name="radio_f" >  </td> 
+                @if(i == 1){
+                    <td style="border: 1px solid #cccccc;padding-left: 6px;">   </td> 
+                }else {
+                    <td style="border: 1px solid #cccccc;padding-left: 6px;"> <a href="/Bestillingsfelter/Bestillingsfelter_edit/?move_up=@rs.id&rediger_id=@ViewBag.rediger_id&type=@Request.QueryString["type"]"> <span class="glyphicon glyphicon-arrow-up"></span> </a>   </td> 
+                }
+           
+                @if(i == @get_radio.Count){
+                    <td style="border: 1px solid #cccccc;padding-left: 6px;">   </td> 
+                }else {
+                    <td style="border: 1px solid #cccccc;padding-left: 6px;"> <a href="/Bestillingsfelter/Bestillingsfelter_edit/?move_down=@rs.id&rediger_id=@ViewBag.rediger_id&type=@Request.QueryString["type"]" ><span class="glyphicon glyphicon-arrow-down"></span>  </a>  </td> 
+                }                
+                    <td style="border: 1px solid #cccccc;padding-left: 6px;"> <a href="/Bestillingsfelter/Bestillingsfelter_edit/?del_radio=@rs.id&rediger_id=@ViewBag.rediger_id&type=@Request.QueryString["type"]" > Slett </a>   </td>                   
+            </tr>            
+            i++;
+        }
+           <tr>
+               <td style="border: 1px solid #cccccc;padding-left: 6px;"> Valgmulighet </td> <td colspan="4" style="border: 1px solid #cccccc;padding-left: 6px;"> <input type="text" name="add_radio"> </td>
+           <tr>  
+     </table>
+             <input type="submit"  name="submit-radio" value="Lagre">
+       </form>
+      break;
+
+      default:
+      break;
+ }

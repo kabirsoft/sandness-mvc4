@@ -1,0 +1,282 @@
+﻿@using System.Web.Mvc;
+@using sandness_mvc4.Models.Diplo;
+@using sandness_mvc4.Models.users;
+@using System.Net.Mail;
+@using NotWebMatrix.Data;
+
+ @{    
+    Page.Title = "Administrator";      
+   var db = Database.Open("SolaBetong");    
+ }
+
+
+
+<div id="newadministrator">
+    <span class="administrator"> @Page.Title </span> <span class="plus"> + </span>       
+</div>
+ @*
+<div id="formadministrator"> 
+   {
+	    bool isPostBack = !String.IsNullOrEmpty(Request.Form["submit-button"]);
+	    var formModel = new AdministratorFormModel();
+
+	    if (!isPostBack)
+	    {
+		    Session.Remove(AdministratorFormModel.SessionKey);
+		   <div class="form-new-administrator">
+                @RenderForm(formModel)
+            </div>
+	    }
+	    else
+	    {
+		    if (Session[AdministratorFormModel.SessionKey] != null)
+		    {
+			    @DisplayResubmissionError()
+			    return;
+		    }
+           
+		    formModel = new AdministratorFormModel(Request.Form);
+            
+            int email_check = db.QueryValue("Select count(Email) from [SolaBetong].[dbo].[user] where Email= @0", @formModel.u_mail);
+		    var errors = formModel.Validate(email_check);
+		    if (errors.Count > 0)
+		    {	
+			    @DisplayErrors(errors)
+			    @RenderForm(formModel)
+		    }
+		    else
+		    {
+                @DisplayCompletionMessage(formModel);
+                // insert into database
+                // not null: u_rolle,u_adminid, account_type, u_active, u_postcode1, u_poststed1, u_proj, u_remember
+                /*
+                <p>fornavn   : @formModel.u_fname</p>
+                <p>Etternavn : @formModel.u_lname</p>
+                <p>E-post    : @formModel.u_mail</p>
+                <p>Mobile    : @formModel.u_phone</p>
+                <p>Group     : @formModel.u_group</p>          
+                <p> Password: @formModel.u_pass </p>    
+                  */
+                //var lastAdminID = db.QuerySingle("Select u_adminid from [sandness].[dbo].[user] Order by u_adminid DESC");
+
+                
+                var lastAdminID = ByggeplassRepository.getLastAdminId();
+                var newAdminID = @lastAdminID + 1;
+                var u_company = @formModel.u_fname;
+               
+                 // because database not null below 7 field
+                
+                 var account_type= 2;
+                var u_active = 0;   
+                var u_postcode1 =  "test"; 
+                var u_poststed1 = "test";
+                var u_proj ="test";
+                var u_remember = 0;
+                var u_rolle = 0;
+                var u_company_name = "SV Betong";
+                
+                //db.Execute("INSERT INTO [SolaBetong].[dbo].[user] (FirstName, LastName, Password, Email, u_phone, u_rolle, u_group, account_type, u_active, u_postcode1, u_poststed1, u_proj, u_remember, u_company, u_company_name) VALUES (@0, @1, @2, @3, @4, @5, @6, @7,@8, @9,@10,@11,@12,@13,@14,@15,@16)",
+                //@formModel.u_fname, @formModel.u_lname,@newAdminID, @formModel.u_pass, @formModel.u_mail, @formModel.u_mail, @formModel.u_phone,  @u_rolle, @formModel.u_group, @account_type, @u_active, @u_postcode1, @u_poststed1, @u_proj, @u_remember, @u_company, @u_company_name);
+             
+             
+             
+              // for email send
+                // Initialize WebMail helper
+                WebMail.SmtpServer = "smtp.gmail.com";
+                WebMail.SmtpPort = 25;
+                WebMail.EnableSsl = true;
+                WebMail.UserName = "bahalul@gmail.com";
+                WebMail.Password = "abcdef28";
+                WebMail.From = "mohammad.kabir@knowit.no";
+
+                // Send email
+                WebMail.Send(to: @formModel.u_mail,
+                    subject: "No reply",
+                    body: "Your user name: " + @formModel.u_mail + " and password :" + @formModel.u_pass
+                );
+
+                var email_m = " An email has been sent with username and password";
+                <p>  @email_m </p>
+                // email send end
+
+                <span style="margin-left: 295px;"> <input type="button" value="backto administrator" onclick="window.location.href= '/administrator/administrator'" > </span> 
+
+         }
+	    
+       }
+
+    }
+  </div>
+   *@
+
+@{
+  var usergroup = ByggeplassRepository.getUserGroup();
+  var kunder = ByggeplassRepository.GetKunde();
+  var roller = ByggeplassRepository.getrolle();
+  var selected = "";
+ }
+  <div id="form-new-administrator">
+  @using (Html.BeginForm("Index", "Administrator", FormMethod.Post, new { id = "AdministratorForm", role = "form" }))
+  {	
+		<fieldset>
+			<legend>Endre bruker</legend>
+             <dl>
+				<dt>
+					<label for="u_fname">Fornavn*</label>
+				</dt>
+				<dd>
+					<input type="text" id="u_fname" class="required" name="firstName" value="" maxlength="255" />
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="u_lname">Etternavn*</label>
+				</dt>
+				<dd>
+					<input type="text" id="u_lname" class="required" name="LastName" value="" maxlength="255" />
+				</dd>
+			</dl>
+			
+			<dl>
+				<dt>
+					<label for="u_mail">E-post*</label>
+				</dt>
+				<dd>
+					<input type="email" id="u_mail" class="required u_mail" name="Email" value="" maxlength="255" />
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="u_phone">Mobiltelefon*</label>
+				</dt>
+				<dd>
+					<input type="text" id="u_phone" class="required u_phone" name="Mobile" value="" maxlength="255" />
+				</dd>
+			</dl>
+            
+            <dl>
+				<dt>
+					<label for="UserGroup">Gruppe : Administrators</label>
+				</dt>
+				<dd>                    
+                    <input type="hidden"  name="UserGroupId" value="1">
+                    @*
+					<select id="u_group" name="u_group">                        
+                      @foreach (var group in usergroup)
+						{                              
+                            if( group.ug_id == Convert.ToInt32(@form.u_group)){
+                                selected = "selected";
+                            }else{
+                                selected = "";
+                            }
+							<option  @selected value="@group.Id">@group.GroupName </option>
+						}						
+					</select>
+                    *@                         
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="Password">Passord*</label>
+				</dt>
+				<dd>
+					<input type="password" id="u_pass" class="required" name="Password" value="" maxlength="255" />
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="con_password">Gjenta Passord*</label>
+				</dt>
+				<dd>
+					<input type="password" id="con_password" class="required" name="con_password" value="" maxlength="255" />
+				</dd>
+			</dl>
+            
+		</fieldset>
+		<div>
+			<input type="submit" name="submit-button" value="Submit" class="button" />
+		</div>
+	
+}
+</div>
+
+@{  
+   /* delete admin */
+  if (! String.IsNullOrEmpty( Request.QueryString["deladmin"] ) ){    
+    db.Execute("delete from [SolaBetong].[dbo].[user] where id=@0",@Request.QueryString["deladmin"]);
+    Response.Redirect(@Request.UrlReferrer.ToString());
+  }
+}
+
+@* list of admins *@
+@{
+    
+  var adminUsersList = ByggeplassRepository.adminUserList();
+  var columns = new[] { "FirstName", "LastName", "Email", "Mobile", "GroupName" };
+  var grid = new WebGrid(adminUsersList, columnNames : columns,rowsPerPage:20);
+
+ }
+
+
+<div id="grid">
+
+     @grid.GetHtml(
+      tableStyle : "table table-hover",
+      alternatingRowStyle : "alternate",
+      headerStyle : "header",
+     
+     numericLinksCount:4,
+     
+    columns: grid.Columns(
+        grid.Column(
+            columnName : "FirstName",
+            header : "User",
+            canSort : true,
+            //style : "disabled",
+            format: @<a class="bygge_id" href="@Href("/administrator/edit_administrator/" + @item.Id)"> @item.FirstName </a>
+         ),
+         
+           grid.Column(
+            columnName : "LastName",
+            header : "Etternavn",
+            canSort : true,
+            //style : "disabled",
+            format: @<a class="bygge_id" href="@Href("/administrator/edit_administrator/" + @item.Id)"> @item.Lastname </a>
+         ),       
+         grid.Column(
+            columnName : "Email",
+            header : "E-post",
+            canSort : true,
+            //style : "disabled",
+            format: @<a class="bygge_id" href="@Href("/administrator/edit_administrator/" + @item.Id)"> @item.Email </a>
+         ),
+        grid.Column(
+            columnName : "Mobile",
+            header : "Phone",
+            canSort : true,
+            //style : "disabled",
+            format: @<a class="bygge_id" href="@Href("/administrator/edit_administrator/" + @item.Id)"> @item.Mobile </a>
+         ),
+        grid.Column(
+            columnName : "UserGroup",
+            header : "Group",
+            canSort : true,
+            //style : "disabled",
+            format: @<a class="bygge_id" href="@Href("/administrator/edit_administrator/" + @item.Id)"> @item.GroupName </a>
+         ),
+
+        grid.Column(
+            columnName : "",
+            header : "Edit|slett",            
+            canSort : false,
+            style:"edit_delete",
+            format: @<text><div style="width: 60px;"><a style="text-decoration: none;" href="@Href("/administrator/edit_administrator/" + @item.Id)"><span class="glyphicon glyphicon-edit"> </span>  </a>  <a id="@item.id" href="@Href("/administrator/administrator/?deladmin=" + @item.id)" onclick="return confirm('Are u sure to delete : @item.FirstName  @item.Lastname ??')"> <span class="glyphicon glyphicon-trash"></span> </a> </div></text>    
+        )
+      )
+    )
+
+</div>

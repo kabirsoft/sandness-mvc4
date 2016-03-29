@@ -1,0 +1,176 @@
+﻿@model sandness_mvc4.Models.Roller.RollerViewModel
+@using System.Web.Mvc;
+@using sandness_mvc4.Models.Diplo;
+@using sandness_mvc4.Models.Roller;
+@using System.Net.Mail;
+@using NotWebMatrix.Data;
+
+@{    
+    Page.Title = "Roller";      
+   var db = Database.Open("SolaBetong");    
+ }
+
+<div id="newroller">
+    <span class="roller"> @Page.Title </span> <span class="plus"> + </span>       
+</div>
+
+
+    @*{
+	    bool isPostBack = !String.IsNullOrEmpty(Request.Form["submit-button"]);
+	    var formModel = new rollerFormModel();
+
+	    if (!isPostBack)
+	    {
+		    Session.Remove(rollerFormModel.SessionKey);
+		   <div class="form-new-roller">
+                @RenderForm(formModel)
+            </div>
+	    }
+	    else
+	    {
+		    if (Session[rollerFormModel.SessionKey] != null)
+		    {
+			    @DisplayResubmissionError()
+			    return;
+		    }
+
+		    formModel = new rollerFormModel(Request.Form);
+		    var errors = formModel.Validate();
+
+		    if (errors.Count > 0)
+		    {	
+			    @DisplayErrors(errors)
+			    @RenderForm(formModel)
+		    }
+		    else
+		    {
+                @DisplayCompletionMessage(formModel);
+                
+
+
+                // insert into database
+                /*
+                <p>Role   : @formModel.rollers_name  </p>
+                <p> Add new : @formModel.rollers_new </p>
+                <p> Edit : @formModel.rollers_edit  </p>
+                    */
+                var now = DateTime.Now;
+                var timestamp= ByggeplassRepository.ToUnix(@now);
+                //<p> current time: @timestamp.ToString()</p>
+
+                 db.Execute("INSERT INTO [sandness].[dbo].[rollers] (name, new, edit, created) VALUES (@0, @1, @2,@3)",
+                 @formModel.rollers_name, @formModel.rollers_new, @formModel.rollers_edit, @timestamp.ToString());
+              
+              }
+	    }
+
+    }
+    *@
+  
+
+ <div id="form-new-roller">
+  @*var db = Database.Open("sandness"); 
+  var edit_rolle = db.QuerySingle("Select * from [sandness].[dbo].[user] where u_id= @0", @);*@
+     @using (Html.BeginForm("Index", "Roller", FormMethod.Post, new { id = "" , role="form"} ) ) 
+     {
+	    <!-- form id="contactForm1" action="" method="post" -->
+		    <fieldset>
+			    <legend>Legge rolle</legend>
+                 <dl>
+				    <dt>
+					    <label for="rollers_name">Rolle*</label>
+				    </dt>
+				    <dd>
+					    <input type="text" id="rollers_name" class="required" name="Name" value="" maxlength="255" />
+				    </dd>
+			    </dl>
+
+                <dl>
+				    <dt>
+					    <label for="rollers_new">Ny bestilling:</label>	
+                    </dt>
+				    <dd>
+					    <input type="radio" name="New" value=1 /> Ya <br />
+                        <input type="radio" name="New" value= 0 checked /> Nei
+			       </dd>
+                </dl>
+                <dl>
+				    <dt>
+                        <label for="rollers_edit"> Endre bestillinge: </label>
+                     </dt>			
+				     <dd> 
+                        <input type="radio"  name="Edit" value=1 /> Ya  <br />
+                        <input type="radio" name="Edit" value=0  checked /> Nei  
+                     </dd>
+			     </dl>
+             </fieldset>
+		    <div>
+			    <input type="submit" name="submit-button" value="Submit" class="button" />
+		    </div>
+    }
+</div>
+
+
+
+
+
+@{  
+
+   /* delete Rolle */
+  if ( !String.IsNullOrEmpty(UrlData[0])){    
+     db.Execute("delete from [sandness].[dbo].[rollers] where id=@0",UrlData[0]);
+     Response.Redirect(@Request.UrlReferrer.ToString());
+  }
+}
+
+
+@* list of admins *@
+@{  
+  var rollerList = ByggeplassRepository.rollerList(); 
+  var columns = new []{"Name", "New","Edit"};
+  var grid = new WebGrid(rollerList, columnNames : columns,rowsPerPage:20);
+ }
+
+<div id="grid">
+
+     @grid.GetHtml(
+      tableStyle : "table table-hover",
+      alternatingRowStyle : "alternate",
+      headerStyle : "header",
+     
+    numericLinksCount:4,
+     
+    columns: grid.Columns(
+        grid.Column(
+            columnName : "Name",
+            header : "Rolle",
+            canSort : true,
+            //style : "disabled",
+            format: @<a class="bygge_id" href="@Href("/Roller/Edit/" + @item.id )"> @item.Name </a>
+         ),
+         grid.Column(
+            columnName : "New",
+            header : "Ny bestilling",
+            canSort : true,
+            //style : "disabled",
+            format: @<a class="bygge_id" href="@Href("/Roller/Edit/" + @item.id)"> @item.New </a>
+         ),
+         grid.Column(
+            columnName : "Edit",
+            header : "Editer bestilling",
+            canSort : true,
+            //style : "disabled",
+            format: @<a class="bygge_id" href="@Href("/Roller/Edit/" + @item.id)"> @item.Edit </a>
+         ),
+
+        grid.Column(
+            columnName : "",
+            header : "Edit|slett",            
+            canSort : false,
+            style:"edit_delete",
+            format: @<text><div style="width: 60px;"><a style="text-decoration: none;" href="@Href("/Roller/Edit/" + @item.id)"> <span class="glyphicon glyphicon-edit"></span> </a>  <a id="@item.id" href="@Href("/Roller/Delete/" + @item.id)" onclick="return confirm('Are u sure to delete : @item.name ??')"> <span class="glyphicon glyphicon-trash"> </span> </a> </div></text>    
+        )
+      )
+    )
+
+</div>

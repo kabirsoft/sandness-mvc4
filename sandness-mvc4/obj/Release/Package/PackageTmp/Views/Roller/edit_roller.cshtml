@@ -1,0 +1,168 @@
+﻿@using System.Web.Mvc;
+@using sandness_mvc4.Models.Diplo;
+@using sandness_mvc4.Models.Roller;
+@using NotWebMatrix.Data;
+
+@{    
+   Page.Title = "Endre Roller";      
+   var db = Database.Open("sandness");    
+
+    if( Session["username"] == null ) {
+           Response.Redirect("~/login/index");
+    }
+ }
+
+
+<div id="formroller"> 
+    @{
+	    bool isPostBack = !String.IsNullOrEmpty(Request.Form["submit-button"]);
+	    var formModel = new rollerFormModel();
+
+	    if (!isPostBack)
+	    {
+		    Session.Remove(rollerFormModel.SessionKey);
+                @RenderForm(formModel)
+	    }
+	    else
+	    {
+		    if (Session[rollerFormModel.SessionKey] != null)
+		    {
+			    @DisplayResubmissionError()
+			    return;
+		    }
+
+		    formModel = new rollerFormModel(Request.Form);
+		    var errors = formModel.Validate();
+
+		    if (errors.Count > 0)
+		    {	
+			    @DisplayErrors(errors)
+			    @RenderForm(formModel)
+		    }
+		    else
+		    {
+                @DisplayCompletionMessage(formModel);
+                
+
+
+                // insert into database
+                /*
+                <p>Role   : @formModel.rollers_name  </p>
+                <p> Add new : @formModel.rollers_new </p>
+                <p> Edit : @formModel.rollers_edit  </p>
+                */
+                var now = DateTime.Now;
+                var timestamp= ByggeplassRepository.ToUnix( @now );
+                //<p> current time: @timestamp.ToString()</p>
+
+                 //db.Execute("INSERT INTO [sandness].[dbo].[rollers] (name, new, edit, created) VALUES (@0, @1, @2,@3)",
+                 //@formModel.rollers_name, @formModel.rollers_new, @formModel.rollers_edit, @timestamp.ToString());
+                 db.Execute("UPDATE [sandness].[dbo].[rollers] SET name=@0, new=@1, edit=@2 WHERE id=@3", 
+                 @formModel.rollers_name, @formModel.rollers_new, @formModel.rollers_edit, @ViewBag.ID) ;
+                 Response.Redirect("~/roller/index");
+              
+              }
+	    }
+
+    }
+  </div>
+
+
+
+@helper RenderForm(rollerFormModel form)
+{ 
+ var db = Database.Open("sandness");
+  var edit_rolle = db.QuerySingle("Select * from [sandness].[dbo].[rollers] where id= @0", @ViewBag.ID);
+  <p> @edit_rolle.created </p>
+
+	<form id="contactForm1" action="" method="post">
+		<fieldset>
+			<legend>Endre bruker</legend>
+             <dl>
+				<dt>
+					<label for="rollers_name">Rolle*</label>
+				</dt>
+				<dd>
+					<input type="text" id="rollers_name" class="required" name="rollers_name" value="@edit_rolle.name" maxlength="255" />
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="rollers_new">Ny bestilling:</label>	
+                </dt>
+				<dd>
+                    @{
+                    var checkYa = "";
+                    var checkNo = "";
+                    if( @edit_rolle.New == 1 ){
+                        checkYa= "checked";
+                        }else{
+                            checkNo = "checked";
+                        }
+                    } 
+					<input type="radio" name="rollers_new" @checkYa value=1 /> Ya <br />
+                    <input type="radio" name="rollers_new" @checkNo value=0 /> Nei 
+                    
+                    
+			   </dd>
+            </dl>
+            <dl>
+				<dt>
+                    <label for="rollers_edit"> Endre bestillinge: </label>
+                 </dt>			
+				 <dd> 
+                    @{
+                        checkYa = "";
+                        checkNo = "";
+                       
+                    if( @edit_rolle.Edit == 1 ){
+                        checkYa= "checked";
+                        }else{
+                            checkNo = "checked";
+                        }
+                    } 
+                     
+                    <input type="radio"  name="rollers_edit" @checkYa value=1 /> Ya  <br />
+                    <input type="radio" name="rollers_edit" @checkNo value=0  /> Nei  
+                 </dd>
+			 </dl>
+         </fieldset>
+		<div>
+			<input type="submit" name="submit-button" value="Submit" class="button" />
+		</div>
+	</form>
+}
+
+@helper DisplayErrors(IEnumerable<string> errors)
+{
+	<h3>Oops!</h3>
+	
+	<p>Please fix the following problems and try again:</p>
+	
+	<ul>
+		@foreach (var error in errors)
+		{
+			<li>@error</li>
+		}
+	</ul>
+}
+
+@helper DisplayCompletionMessage(rollerFormModel formModel)
+{
+	<p>
+		Thank you @formModel.rollers_name, Data has been successfully updated!
+	</p>
+	<p>Note: If you try and reload the page the form won't be resubmitted.</p>
+	Session.Add(rollerFormModel.SessionKey, true); // set session variable to indicate form has been submitted
+	// You can now easily email this or store it in a database etc.
+}
+
+@helper DisplayResubmissionError()
+{
+  <div class="ResubmissionError">	
+    <h3>Oops!</h3>
+	<p>You are trying to submit the form again!</p>
+  </div>
+}
+

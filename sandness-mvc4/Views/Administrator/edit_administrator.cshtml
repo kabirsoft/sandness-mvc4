@@ -1,0 +1,234 @@
+﻿@using System.Web.Mvc;
+@using sandness_mvc4.Models.Diplo;
+@using sandness_mvc4.Models.Administrator;
+@using NotWebMatrix.Data;
+
+@{    
+    Page.Title = "Administrator";      
+   var db = Database.Open("sandness");    
+
+    if( Session["username"] == null ) {
+           Response.Redirect("~/login/Index");
+        }
+ }
+
+
+
+<div id="formadministrator"> 
+    @{
+	    bool isPostBack = !String.IsNullOrEmpty(Request.Form["submit-button"]);
+	    var formModel = new AdministratorFormModel();
+
+	    if (!isPostBack)
+	    {
+		    Session.Remove(AdministratorFormModel.SessionKey);		   
+                @RenderForm(formModel)           
+	    }
+	    else
+	    {
+		    if (Session[AdministratorFormModel.SessionKey] != null)
+		    {
+			    @DisplayResubmissionError()
+			    return;
+		    }
+
+		    formModel = new AdministratorFormModel(Request.Form);
+            int email_check = db.QueryValue("Select count(u_mail) from [sandness].[dbo].[user] where u_login= @0 and u_id !=@1", @formModel.u_mail, ViewBag.AdminID);
+		    var errors = formModel.Validate(email_check);
+		    
+
+		    if (errors.Count > 0)
+		    {	
+			    @DisplayErrors(errors)
+			    @RenderForm(formModel)
+		    }
+		    else
+		    {
+                @DisplayCompletionMessage(formModel);
+                //update 
+                /*
+                <p>fornavn   : @formModel.u_fname</p>
+                <p>Etternavn : @formModel.u_lname</p>
+                <p>E-post    : @formModel.u_mail</p>
+                <p>Mobile    : @formModel.u_phone</p>
+                <p>Group     : @formModel.u_group</p>          
+                <p> Password: @formModel.u_pass </p>    
+                */
+                db.Execute("UPDATE [sandness].[dbo].[user] SET u_fname =  @0, u_lname=@1, u_mail =@2, u_phone = @3, u_group = @4, u_pass=@5 WHERE u_id = @6",
+                @formModel.u_fname, @formModel.u_lname, @formModel.u_mail, @formModel.u_phone, @formModel.u_group, @formModel.u_pass, ViewBag.AdminID);
+                 <span style="margin-left: 295px;"> <input type="button" value="backto administrator" onclick="window.location.href = '/administrator/administrator'" > </span> 
+            }
+	    }
+
+    }
+  </div>
+
+@helper RenderForm(AdministratorFormModel form)
+{
+  var usergroup = ByggeplassRepository.getUserGroup();
+  var kunder = ByggeplassRepository.GetKunde();
+  var roller = ByggeplassRepository.getrolle();
+
+  //var userID= UrlData[0];
+  var userID = ViewBag.AdminID;
+  var db = Database.Open("sandness");	   
+  var userRecord = db.QuerySingle("Select * from [sandness].[dbo].[user] where u_id= @0",userID);   
+  var selected ="";
+
+
+	<form id="AdministratorForm" action="" method="post">
+		<fieldset>
+			<legend>Endre bruker</legend>
+             <dl>
+				<dt>
+					<label for="u_fname">Fornavn*</label>
+				</dt>
+				<dd>
+					<input type="text" id="u_fname" class="required" name="u_fname" value="@userRecord.u_fname" maxlength="255" />
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="u_lname">Etternavn*</label>
+				</dt>
+				<dd>
+					<input type="text" id="u_lname" class="required" name="u_lname" value="@userRecord.u_lname" maxlength="255" />
+				</dd>
+			</dl>
+			
+			<dl>
+				<dt>
+					<label for="u_mail">E-post*</label>
+				</dt>
+				<dd>
+					<input type="email" id="u_mail" class="required u_mail" name="u_mail" value="@userRecord.u_mail" maxlength="255" />
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="u_phone">Mobiltelefon*</label>
+				</dt>
+				<dd>
+					<input type="text" id="u_phone" class="required u_phone" name="u_phone" value="@userRecord.u_phone" maxlength="255" />
+				</dd>
+			</dl>
+            
+            <dl>
+				<dt>
+					<label for="u_group">Gruppe</label>
+				</dt>
+				<dd>
+					<select id="u_group" name="u_group">
+
+                      @foreach (var group in usergroup)
+						{
+                            if( @userRecord.u_group == group.ug_id){  
+                                selected = "selected"; 
+                                }else{
+                                    selected = "";
+                                }
+							<option value="@group.ug_id" @selected>@group.ug_name</option>
+						}						
+						
+					</select>
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="u_pass">Passord*</label>
+				</dt>
+				<dd>
+					<input type="password" id="u_pass" class="required" name="u_pass" value="@userRecord.u_pass" maxlength="255" />
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="con_password">Gjenta Passord*</label>
+				</dt>
+				<dd>
+					<input type="password" id="con_password" class="required" name="con_password" value="@userRecord.u_pass" maxlength="255" />
+				</dd>
+			</dl>
+            
+		</fieldset>
+		<div>
+			<input type="submit" name="submit-button" value="Submit" class="button" />
+		</div>
+	</form>
+}
+
+@helper DisplayErrors(IEnumerable<string> errors)
+{
+	<h3>Oops!</h3>
+	
+	<p>Please fix the following problems and try again:</p>
+	
+	<ul>
+		@foreach (var error in errors)
+		{
+			<li style="color: red">@error</li>
+		}
+	</ul>
+}
+
+@helper DisplayCompletionMessage(AdministratorFormModel formModel)
+{
+	<p>
+		Thank you, @formModel.u_fname, Your Data has been successfully inserted!
+	</p>
+	
+	<p>
+		The data you inserted is:
+	</p>
+	
+	<table>
+		<tr>
+			<th>Name</th><th>Value</th>
+		</tr>
+		
+		<tr>
+			<td>First name</td><td>@formModel.u_fname</td>
+		</tr>
+        <tr>
+			<td>Last name</td><td>@formModel.u_lname</td>
+		</tr>
+		<tr>
+			<td>E-post</td><td>@formModel.u_mail</td>
+		</tr>
+		<tr>
+			<td>Telefon</td><td>@formModel.u_phone</td>
+		</tr>
+        <tr>
+			<td>Group</td><td>@formModel.u_group</td>
+		</tr>
+        
+        <tr>
+			<td>Password</td><td>@formModel.u_pass</td>
+		</tr>
+		
+	</table>
+	
+	<p>Note: If you try and reload the page the form won't be resubmitted.</p>
+	
+	Session.Add(AdministratorFormModel.SessionKey, true); // set session variable to indicate form has been submitted
+
+	// You can now easily email this or store it in a database etc.
+}
+
+@helper DisplayResubmissionError()
+{
+  <div class="ResubmissionError">	
+    <h3>Oops!</h3>
+	<p>You are trying to submit the form again!</p>
+  </div>
+}
+
+
+
+
+
+

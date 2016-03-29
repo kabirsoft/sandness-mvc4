@@ -1,0 +1,138 @@
+﻿@using NotWebMatrix.Data;
+
+@{
+    Layout = null;
+    
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title> @ViewBag.Title </title>
+        <link href="~/Content/theme/Site.css" rel="stylesheet" type="text/css" />        
+        <link href="~/Content/bootstrap/bootstrap.min.css" rel="stylesheet">
+        <link href="~/Content/custom/style.css" rel="stylesheet" type="text/css" />
+        <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />        
+        <script src="~/Scripts/modernizr-2.5.3.js"></script>  
+
+        <!--  datepicker -->
+        	<link href="~/Content/jqueryUi/ui-lightness/jquery-ui-1.10.3.custom.css" rel="stylesheet">
+    	    <script src="~/Scripts//jquery-1.9.1.js"></script>
+	        <script src="~/Scripts/jquery-ui-1.10.3.custom.js"></script>
+        <!-- custom datepicker -->
+        
+        <script src="~/Scripts/bootstrap.min.js"></script>
+        <script src="~/Scripts/script.js"></script>
+    @*
+    @Styles.Render("~/styles/bootstrap")
+    @Styles.Render("~/styles/jqueryUi")
+    @Styles.Render("~/styles/custom")
+    @RenderSection("style", required: false)   
+    *@ 
+     
+</head>
+<body>
+
+     <header>            
+             <div class="content-wrapper container">
+                <div>
+                    <p class="site-title"><a href="~/bestillinger/index"> <img alt="logo" src="~/Content/Images/logo.gif" />  </a></p>
+                </div>
+                <div class="float-right">
+                    <section id="login">                        
+                        @{
+                            Server.ScriptTimeout = 3600;
+                        }
+                        
+                        @if( @Session["username"]!=null &&  ! String.IsNullOrEmpty( @Session["username"].ToString() )){                            
+                            <span> @Session["username"] </span><a href="~/login/logout"> logout </a>
+                        } else {
+                            <ul>                            
+                                <!-- li><a href="~/login/Login">Login</a></li -->
+                            </ul>
+                        }
+                    </section>
+                    @{
+                        var db = Database.Open("SolaBetong");  
+                    }
+                     @if( @Session["username"]!=null &&  ! String.IsNullOrEmpty( @Session["username"].ToString() ) ){
+                         var login_group = db.QueryValue("Select u_group from [sandness].[dbo].[user] where u_mail=@0", @Session["username"]);
+
+                         var nybestilling = "";
+                         var byggeplass = "";
+                         var bestillinger = "";
+                         var instillinger = "";
+                         
+                         try{
+                                 switch ( @Session["currentMenu"].ToString())
+	                             {
+                                     case "nybestilling":
+                                        nybestilling = "class=active";
+                                        break;
+                                     case "byggeplass":
+                                        byggeplass = "class=active";                                
+                                        break;
+                                     case "bestillinger":
+                                        bestillinger = "class=active";
+                                        break;
+                                     case "instillinger":
+                                        instillinger = "class=active";
+                                        break;   
+		                            default:
+                                        nybestilling = "class= active";
+                                        break;
+	                            } 
+                            }
+                            catch (Exception ex) 
+                            {
+                                 <p> @ex </p>
+                            }                      
+                         
+                      <nav class="navbar navbar-default" role="navigation">
+                            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">                                
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                            </button>                            
+                            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                              <ul class="nav navbar-nav">
+                                  <li @nybestilling><a href="~/Nybestilling/Index/">Ny bestilling</a></li>
+                                   @if( Convert.ToInt32( login_group ) == 1 ){
+                                     <li @byggeplass ><a href="~/Byggeplass/Index">Byggeplass </a></li>
+                                   }                            
+                                   <li   @bestillinger ><a href="~/bestillinger/Index/">Bestillinger</a></li>                            
+                                   <li   @instillinger ><a href="~/instillinger/Index">Instillinger</a></li>
+                                </ul>
+                            </div>
+                       </nav>
+                          
+                    }
+                </div>
+            </div>
+    </header>
+    <div id="body">
+        @RenderSection("featured", required: false)
+        <section class="content-wrapper main-content clear-fix container">
+           @RenderBody()
+        </section>
+    </div>     
+        
+    <footer>
+            <div class="content-wrapper container">
+                <div>
+                    <p>&copy; @DateTime.Now.Year - Powered by <a target="_blank" href="http://www.knowit.no"> Knowit </a></p>
+                </div>
+            </div>
+        </footer>
+    
+         
+         @Scripts.Render("~/bundles/jquery")
+         @Scripts.Render("~/bundles/bootstrapJs")                          
+         @RenderSection("scripts", required: false)
+    
+    
+</body>
+</html>

@@ -1,0 +1,290 @@
+﻿@model sandness_mvc4.Models.Byggeplass.ByggeplassViewModel
+
+@using System.Web.Mvc;
+@using System.Text;
+@using sandness_mvc4.Models.Diplo;
+@using sandness_mvc4.Models.Byggeplass;
+@using NotWebMatrix.Data;
+
+@{  
+   Page.Title = "Byggeplass";
+   var db = Database.Open("SolaBetong");
+   Session.Remove("currentMenu");
+   Session["currentMenu"] = "byggeplass";
+  }
+  <div id="newproject">
+    <span class="project"> @Page.Title </span> <span class="plus"> + </span>       
+</div>
+@*
+ 
+    @{         
+	    bool isPostBack = !String.IsNullOrEmpty(Request.Form["submit-button"]);
+	    var formModel = new ProjectFormModel();
+        var style_frm_show="";        
+        bool isUid = ! string.IsNullOrEmpty( Request.QueryString["uid"] ) ;
+        bool isPro = ! string.IsNullOrEmpty( Request.QueryString["addproject"] );
+        if( isUid && isPro  ){
+           style_frm_show = "style=display:block";
+        }
+        
+	    if (!isPostBack)
+	    {
+		    Session.Remove(ProjectFormModel.SessionKey);
+		   <div class="form-new-project" @style_frm_show >
+                @RenderForm(formModel)
+            </div>
+	    }
+	    else
+	    {
+		    if (Session[ProjectFormModel.SessionKey] != null)
+		    {
+			    @DisplayResubmissionError()
+			    return;
+		    }
+
+		    formModel = new ProjectFormModel(Request.Form);
+		    var errors = formModel.Validate();
+
+		    if (errors.Count > 0)
+		    {	
+			    @DisplayErrors(errors)
+			    @RenderForm(formModel)
+		    }
+		    else
+		    {
+                // insert into database
+                 @DisplayCompletionMessage(formModel);
+                /*
+                @formModel.u_company
+                @formModel.pro_name
+                @formModel.pro_adres
+                @formModel.pro_adresinfo
+                @formModel.pro_num
+                */
+              
+                 //var weekDay = DateTime.Now.DayOfWeek;
+                 var now = DateTime.Now;
+                 var timestamp= ByggeplassRepository.ToUnix(@now);
+                 //<p> current time: @timestamp.ToString()</p>
+                 if( isUid && isPro ){
+                    db.Execute("INSERT INTO [sandness].[dbo].[projects] (uid,name,adres, adresinfo, num, created) VALUES (@0, @1, @2, @3, @4, @5)", @Request.QueryString["uid"], @formModel.pro_name, @formModel.pro_adres, @formModel.pro_adresinfo, @formModel.pro_num, @timestamp.ToString()); 
+                 }else {
+                    db.Execute("INSERT INTO [sandness].[dbo].[projects] (uid,name,adres, adresinfo, num, created) VALUES (@0, @1, @2, @3, @4, @5)", @formModel.u_company, @formModel.pro_name, @formModel.pro_adres, @formModel.pro_adresinfo, @formModel.pro_num, @timestamp.ToString());
+                 }
+
+                 var last_ins_proid = db.QueryValue("SELECT IDENT_CURRENT('[projects]')");
+                 var timestamp1= ByggeplassRepository.ToUnix(@now);
+                 if( !string.IsNullOrEmpty(@Request.Form["added_email"])){
+                    <p> Email add: </p>
+                    foreach (var email in @Request.Form["added_email"].Split(',')){                        
+                        db.Execute("INSERT INTO [sandness].[dbo].[pr_mails] (created, pr_id, mail) values(@0, @1, @2)",@timestamp1,@last_ins_proid,@email) ;                    
+                    }
+                 }
+
+                 <span> <input type="button" value="backto project page" onclick="window.location.href = '/Byggeplass/index'" > </span> 
+		    }
+	    }
+
+    }
+  </div>
+*@
+@{
+    var style_frm_show = "";
+    bool isUid = !string.IsNullOrEmpty(Request.QueryString["uid"]);
+    bool isPro = !string.IsNullOrEmpty(Request.QueryString["addproject"]);
+    if (isUid && isPro)
+    {
+        style_frm_show = "style=display:block";
+    }
+    var kunder = ByggeplassRepository.GetKunde();
+    var selected = "";    
+    
+}
+ <div id="form-new-project" @style_frm_show >
+    @using (Html.BeginForm("Index", "Byggeplass", FormMethod.Post, new { id = "contactForm", role = "form" }))
+    {  
+	    <!-- form id="contactForm" action="" method="post" -->
+		    <fieldset>
+			    <legend>Ny Byggeplass</legend>
+			    <dl>
+				    <dt>
+					    <label for="u_company">Kunde</label>
+				    </dt>
+				    <dd>
+                        <select id="u_company" name="CustomerId">
+                            <option value="-1"> - Velg   kunde -</option> 						
+						    @foreach (var kunde in kunder)
+                              {
+                                 @*if (Convert.ToInt32(Request.QueryString["uid"]) == kunde.u_id)
+                                  {
+                                      selected = "selected";
+                                  }
+                                  else
+                                  {
+                                      selected = "";
+                                  }*@
+							      <option  @selected value="@kunde.Id" >@kunde.Name</option> 
+                              }
+					    </select>
+
+				    </dd>
+			    </dl>
+			
+			    <dl>
+				    <dt>
+					    <!-- label for="pro_name">Prosjektnavn*</label -->
+                        @Html.LabelFor(m=>m.Name)
+				    </dt>
+				    <dd>
+					    <!-- input type="text" id="pro_name" class="required pro_name" name="pro_name" value="orm.pro_name" maxlength="255" /-->
+                        @Html.TextBoxFor(m => m.Name, new { id="pro_name", Name="Name", Class="pro_name" })
+				    </dd>
+			    </dl>
+
+                <dl>
+				    <dt>
+					    <!-- label for="pro_adres">Adresse*</label -->
+                        @Html.LabelFor(m=>m.Address )
+				    </dt>
+				    <dd>
+					    <!-- input type="text" id="pro_adres" class="required pro_adres" name="pro_adres" value="form.pro_adres" maxlength="255" / -->
+                         @Html.TextBoxFor(m => m.Address, new { id="pro_adres", Name="Address", Class="pro_adres", Value="" })
+				    </dd>
+			    </dl>
+                  <dl>
+				    <dt>
+					    <!-- label for="pro_adresinfo">Adresseinformasjon</l -->
+                        @Html.LabelFor(m=>m.City)
+				    </dt>
+				    <dd>
+					    <!-- input type="text" id="pro_adresinfo"  name="pro_adresinfo" value="form.pro_adresinfo" maxlength="255" / -->
+                        @Html.TextBoxFor(m => m.City, new { id="pro_adresinfo", Name="City", Class="pro_adresinfo", Value="" })
+				    </dd>
+			    </dl>
+                <dl>
+				    <dt>
+					    <!-- label for="pro_num">Prosjektnummer</label -->
+                        @Html.LabelFor(m=>m.ProjectNumber)
+				    </dt>
+				    <dd>
+					    <!-- input type="text" id="pro_num" class="pro_num" name="pro_num" value="form.pro_num" maxlength="255" / -->
+                        @Html.TextBoxFor(m => m.ProjectNumber, new { id="pro_num", Name="ProjectNumber", Class="pro_num", Value="" })
+				    </dd>
+			    </dl>
+
+              
+               <dl>
+                   <dt>
+					    <label> Email  </label>
+				    </dt>        
+        
+                   </dl>
+               <div class="buttons">
+                 <input type="button" class="btnAdd" value="Add Email"><br /><br/>
+               </div>
+		    </fieldset>
+		    <div>
+			    <input type="submit" name="submit-button" value="Submit" class="button" />
+		    </div>	
+    }
+     </div>
+
+  @*all list of projects  *@
+
+@{  
+   /* delete project */
+  if ( !String.IsNullOrEmpty(UrlData[0])){    
+    db.Execute("delete from [SolaBetong].[dbo].[projects] where id=@0",UrlData[0]);
+    //Response.Redirect("/Byggeplass/index/");
+     Response.Redirect(@Request.UrlReferrer.ToString());
+  }
+
+
+  /* filter dropdown change kunde */
+    var byggeplass = ByggeplassRepository.GetByggeplass(); 
+    
+    if ( !string.IsNullOrEmpty( @Request.QueryString["project_uid"])){      
+       byggeplass = ByggeplassRepository.GetByggeplass(@Request.QueryString["project_uid"]);
+     }
+
+    var columns = new[] { "ProjectNumber", "Name", "kundeName", "Address", "City" };
+    var grid = new WebGrid(byggeplass, columnNames : columns,rowsPerPage:25);
+    //var lastAdminID = db.QuerySingle("Select u_company from [sandness].[dbo].[user] where u_id=328");
+
+ }
+ 
+ 
+ <div id="grid">
+     @{
+      //var proj_id= (Int32)@Request.QueryString["project_uid"];
+       kunder = ByggeplassRepository.GetKunde();   
+       var projid= @Request.QueryString["project_uid"]; 
+       selected = "";
+       
+     <div style= "margin-top: 10px;">                
+             	<span> <label for="u_company">Kunde</label> </span>				
+				<span>
+                    <select id="kunde_filter" name="u_company" onchange="window.location.href = '/Byggeplass/index/?project_uid=' + $(this).val();">
+                        <option value=""> Alle</option> 						
+						@foreach (var kunde in kunder){
+                            if( !string.IsNullOrEmpty (@projid) && Convert.ToInt32(@projid) == kunde.Id)
+                                {selected="selected";
+                                }else if( string.IsNullOrEmpty(@projid)){
+                                    selected="";
+                                }
+                                else{selected = ""; }  
+							<option value ="@kunde.Id" @selected>@kunde.Name </option> 
+						}
+					</select>
+                </span>
+            </div>
+     }          
+
+    @grid.GetHtml(
+     tableStyle : "table table-hover ",
+     alternatingRowStyle : "alternate",
+     headerStyle : "header",
+     
+     numericLinksCount:20,
+     
+    columns: grid.Columns(
+        grid.Column(
+            columnName : "ProjectNumber",
+            header : "#",
+            canSort : true,
+            //style : "disabled",
+            format: @<a class="bygge_id" href="@Href("/Byggeplass/Edit/" + @item.Id)"> @item.ProjectNumber </a>
+         ),
+        grid.Column(
+            columnName : "Name",
+             header : "Byggeplass",
+             format: @<a class="bygge_name" href="@Href("/Byggeplass/Edit/" + @item.Id)"> @item.Name </a>
+        ),
+        grid.Column(
+            columnName : "kundeName",
+             header : "Kunde"
+        ),
+        grid.Column(
+            columnName : "Address",
+            header : "Adresse"
+        ),
+        grid.Column(
+            columnName : "City",
+            header : "City"            
+            //canSort : false,
+            //style : "disabled"
+        ),
+        grid.Column(
+            columnName : "",
+            header : "Edit|slett",            
+            canSort : false,
+            style:"edit_delete",
+             format: @<text><div style="width: 60px;"><a style="text-decoration: none;" href="@Href("/Byggeplass/Edit/" + @item.Id)"> <span class="glyphicon glyphicon-edit"></span> </a>  <a id="@item.Name" href="@Href("/Byggeplass/Delete/" + @item.Id)" onclick="return confirm('Are u sure to delete : @item.Name ??')"> <span class="glyphicon glyphicon-trash"> </span> </a> </div></text>    
+        )
+      )
+    )
+
+  </div>
+
+
+

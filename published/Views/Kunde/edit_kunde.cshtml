@@ -1,0 +1,224 @@
+﻿@using System.Web.Mvc;
+@using sandness_mvc4.Models.Kunde;
+@using sandness_mvc4.Models.Diplo;
+@using NotWebMatrix.Data;
+
+@{    
+    Page.Title = "Edit Kunde";
+    var db = Database.Open("sandness");
+}
+
+
+<div> 
+    @{
+        //var id = @Request.QueryString["id"];
+        
+    }
+    
+
+
+</div>
+
+
+<div id="formkunde"> 
+    @{
+	    bool isPostBack = !String.IsNullOrEmpty(Request.Form["submit-button"]);
+	    var formModel = new KundeFormModel();
+
+	    if (!isPostBack)
+	    {
+		    Session.Remove(KundeFormModel.SessionKey);		   
+                @RenderForm(formModel)           
+	    }
+	    else
+	    {
+		    if (Session[KundeFormModel.SessionKey] != null)
+		    {
+			    @DisplayResubmissionError()
+			    return;
+		    }
+
+		    formModel = new KundeFormModel(Request.Form);
+		    var errors = formModel.Validate();
+
+		    if (errors.Count > 0)
+		    {	
+			    @DisplayErrors(errors)
+			    @RenderForm(formModel)
+		    }
+		    else
+		    {
+                // Update database
+               
+
+                @DisplayCompletionMessage(formModel);
+                /*
+                <p>ID: @UrlData[0] </p>
+                <p> Bedriftsnavn: @formModel.bedriftsnavn </p>               
+                <p> email: @formModel.email   </p>
+                <p> tele: @formModel.telefon </p>
+                <p> city: @formModel.by </p>
+                <p> org: @formModel.organisasjonsnummer </p>
+                    <p> Postaddress : @formModel.postadresse  </p>
+                 var company_name = @formModel.bedriftsnavn;
+                */
+
+                                                    db.Execute("UPDATE [sandness].[dbo].[user] SET u_company_name =  @0, u_login=@1, u_phone =@2, u_postcode = @3, u_city = @4, u_orgnum = @5 WHERE u_id = @6", @formModel.bedriftsnavn, @formModel.email, @formModel.telefon, @formModel.postadresse, @formModel.by, @formModel.organisasjonsnummer, ViewBag.KundeID);
+                <span> <input type="button" value="backto Kunde" onclick="window.location.href = '/kunde/kunde'" > </span> 
+            }
+	    }
+    }
+  </div>
+
+
+@helper RenderForm(KundeFormModel form)
+{
+     
+    //var kundeID= UrlData[0];
+    var kundeID = ViewBag.KundeID;
+    <p> kundeID:@kundeID </p>
+    
+    var db = Database.Open("sandness");	
+	var kunde = db.QuerySingle("Select u_company_name,u_login,u_phone,u_postcode,u_city,u_orgnum from [sandness].[dbo].[user] where u_id= @0",kundeID);     
+       
+    	
+	<form id="contactForm" action="" method="post">
+		<fieldset>
+			<legend>Edit Kunde</legend>
+			
+			<dl>
+				<dt>
+					<label for="bedriftsnavn">Bedriftsnavn*</label>
+				</dt>
+				<dd>
+					<input type="text" id="bedriftsnavn" class="required" name="bedriftsnavn" value="@kunde.u_company_name" maxlength="255" />
+				</dd>
+			</dl>
+			
+			<dl>
+				<dt>
+					<label for="email">E-post*</label>
+				</dt>
+				<dd>
+					<input type="email" id="email" class="required email" name="email" value="@kunde.u_login" maxlength="255" />
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="telefon">Telefon*</label>
+				</dt>
+				<dd>
+					<input type="text" id="telefon" class="required telefon" name="telefon" value="@kunde.u_phone" maxlength="255" />
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="postadresse">Postadresse*</label>
+				</dt>
+				<dd>
+					<input type="text" id="postadresse" class="required postadresse" name="postadresse" value="@kunde.u_postcode" maxlength="255" />
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="by">By*</label>
+				</dt>
+				<dd>
+					<input type="text" id="by" class="required by" name="by" value="@kunde.u_city" maxlength="255" />
+				</dd>
+			</dl>
+
+             <dl>
+				<dt>
+					<label for="by">Organisasjonsnummer</label>
+				</dt>
+				<dd>
+					<input type="text" id="organisasjonsnummer" class="organisasjonsnummer" name="organisasjonsnummer" value="@kunde.u_orgnum" maxlength="255" />
+				</dd>
+			</dl>
+			
+			
+			
+		</fieldset>
+		<div>
+			<input type="submit" name="submit-button" value="Submit" class="button" />
+		</div>
+	</form>
+}
+
+
+@helper DisplayErrors(IEnumerable<string> errors)
+{
+	<h3>Oops!</h3>
+	
+	<p>Please fix the following problems and try again:</p>
+	
+	<ul>
+		@foreach (var error in errors)
+		{
+			<li>@error</li>
+		}
+	</ul>
+}
+
+
+
+
+
+@helper DisplayCompletionMessage(KundeFormModel formModel)
+{
+	<h3>Thank You</h3>
+	
+	<p>
+		Thank you, @formModel.bedriftsnavn, your message has been successfully Updated!
+	</p>
+	
+	<p>
+		The data you updated is:
+	</p>
+	
+	<table>
+		<tr>
+			<th>Name</th><th>Value</th>
+		</tr>
+		
+		<tr>
+			<td>Bedriftsnavn</td><td>@formModel.bedriftsnavn</td>
+		</tr>
+		<tr>
+			<td>E-post</td><td>@formModel.email</td>
+		</tr>
+		<tr>
+			<td>Telefon</td><td>@formModel.telefon</td>
+		</tr>
+		<tr>
+			<td>Postadresse</td><td>@formModel.postadresse</td>
+		</tr>
+		<tr>
+			<td>By</td><td>@formModel.by</td>
+		</tr>
+        <tr>
+			<td>Organisasjonsnummer</td><td>@formModel.organisasjonsnummer</td>
+		</tr>
+	</table>
+	
+	<p>Note: If you try and reload the page the form won't be resubmitted.</p>
+	
+	Session.Add(KundeFormModel.SessionKey, true); // set session variable to indicate form has been submitted
+
+	// You can now easily email this or store it in a database etc.
+}
+
+
+
+
+@helper DisplayResubmissionError()
+{
+  <div class="ResubmissionError">	
+    <h3>Oops!</h3>
+	<p>You are trying to submit the form again!</p>
+  </div>
+}

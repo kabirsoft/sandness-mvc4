@@ -1,0 +1,224 @@
+﻿@model sandness_mvc4.Models.Kunde.KundeViewModel
+
+@using System.Web.Mvc;
+@using sandness_mvc4.Models.Diplo;
+@using sandness_mvc4.Models.Kunde;
+@using NotWebMatrix.Data;
+
+@{    
+    Page.Title = "Kunde";
+    var db = Database.Open("SolaBetong");
+   
+}
+@*{
+  if( Session["username"] == null) {
+       Response.Redirect("~/login/Index");
+    }    
+}*@
+    
+<div id="nykunde">
+    <span class="kunde"> @Page.Title </span> <span class="plus"> + </span>
+</div>
+<div id="kunde_list">
+    <span class="kunde_A"> A </span><span class="kunde_B" >B</span> <span class="kunde_C" >C</span>  <span class="kunde_D">D</span> <span class="kunde_E" >E</span>
+    <span class="kunde_F"> F </span><span class="kunde_G" >G</span> <span class="kunde_H" >H</span>  <span class="kunde_I">I</span> <span class="kunde_J">J</span>  
+    <span class="kunde_K"> K </span><span class="kunde_L" >L</span> <span class="kunde_M" >M</span>  <span class="kunde_N">N</span> <span class="kunde_O">O</span> 
+    <span class="kunde_P"> P </span><span class="kunde_Q" >Q</span> <span class="kunde_R" >R</span>  <span class="kunde_S">S</span> <span class="kunde_T">T</span>  
+    <span class="kunde_U"> U </span><span class="kunde_V" >V</span> <span class="kunde_W" >W</span>  <span class="kunde_X">X</span> <span class="kunde_Y">Y</span>
+    <span class="kunde_Z"> Z</span><span class="kunde_AO"> Å </span><span class="kunde_AE" >Æ</span>  <span class="kunde_OO" >Ø</span>
+  </div>
+
+@{
+    string[] letters = {"A", "B", "C", "D","E","F", "G", "H", "I","J","K", "L", "M", "N","O","P", "Q", "R", "S","T","U","V","W","X","Y","Z", "AO", "AE", "OO"};
+    foreach(var letter in letters){
+        /*  inside */
+
+       <div class="kunde_start_with_@letter">
+           @{
+                switch(@letter)
+                {
+                    case "AO":
+                         <h5> kunde begynne med bokstaven Å </h5>
+                         break;
+                    case "AE":
+                         <h5> kunde begynne med bokstaven Æ </h5>
+                         break;
+                   case "OO":
+                         <h5> kunde begynne med bokstaven Ø </h5>
+                         break;
+                    default:
+                         <h5> kunde begynne med bokstaven @letter </h5>
+                         break;                   
+                }
+          }
+         @{          
+           var sql = "Select Distinct Name  from [SolaBetong].[dbo].[Customer] where Name like '"+@letter+"%' order by Name ASC";
+           var data_user_A = db.Query(sql);
+          }
+            <ul>
+            @{   
+            foreach (var user_A  in data_user_A ){                              
+            var CustomerId = db.QueryValue("Select Id from [SolaBetong].[dbo].[Customer] where Name = @0", @user_A.Name);   // here should data pass be u_adminid(temporarily using u_id) but first I have to know how to strore adminid for ny kunder  
+            <li> <a href="@Href("/kunde/edit_kunde/" + @CustomerId)"> @user_A.Name</a> <a title="Add new project" class="kundePro_with_letter" href="@Href("/Byggeplass/index.cshtml/?addproject=1&uid=" + @CustomerId)"> + </a></li>  
+
+
+                 var sqlA_user = db.Query("SELECT Id,Firstname,LastName FROM [SolaBetong].[dbo].[User] WHERE CustomerId = @0 ORDER BY FirstName ", @CustomerId);   
+                     foreach ( var kunde_u_A in sqlA_user ){
+                         <li class="user_under_customer"><a href="@Href("/users/edit_user/" + @kunde_u_A.Id)"> @kunde_u_A.Firstname @kunde_u_A.LastName  </a></li>
+                     }
+             }
+          }
+       
+         </ul>
+       </div>
+       /* End inside */
+    }
+}
+
+    @* {
+	    bool isPostBack = !String.IsNullOrEmpty(Request.Form["submit-button"]);
+        var formModel = new KundeFormModel();
+        
+	    if (!isPostBack)
+	    {
+            Session.Remove(KundeFormModel.SessionKey);
+		   <div class="form-ny">
+                @RenderForm(formModel)
+            </div>
+	    }
+	    else
+	    {
+            if (Session[KundeFormModel.SessionKey] != null)
+		    {
+			    @DisplayResubmissionError()
+			    return;
+		    }
+
+            formModel = new KundeFormModel(Request.Form);
+		    var errors = formModel.Validate();
+
+		    if (errors.Count > 0)
+		    {	
+			    @DisplayErrors(errors)
+			    @RenderForm(formModel)
+		    }
+		    else
+		    {
+                // insert into database
+                //db.Execute("INSERT INTO UserProfile (Email) VALUES (@0)", email);
+                //var lastAdminID = db.QuerySingle("Select u_adminid from [sandness].[dbo].[user] Order by u_adminid DESC");
+                //<p>last: @lastAdminID.u_adminid</p>
+                
+                @DisplayCompletionMessage(formModel);
+                var rolle = 3;  // company role 3
+                var group = 3; //  company user group 3
+                var account_type= 2;
+                var u_active = 0;   
+                var u_postcode1 =  @formModel.postadresse; 
+                var u_poststed1 =  @formModel.postadresse;
+                var u_proj ="test";
+                var u_remember = 0;
+                var u_company_name = @formModel.bedriftsnavn;
+                
+                
+                var adminid = ByggeplassRepository.getAdminId( @Session["username"].ToString() );
+                
+                db.Execute("INSERT INTO [sandness].[dbo].[user] (u_login,u_adminid,u_rolle,u_group, account_type, u_active, u_postcode1, u_poststed1, u_proj, u_remember, u_company, u_company_name, u_phone, u_postcode, u_city, u_orgnum) VALUES (@0, @1, @2, @3, @4, @5, @6, @7,@8, @9, @10, @11, @12, @13,@14,@15)",
+                @Request["email"], @adminid, @rolle, @group, @account_type, @u_active, @u_postcode1, @u_poststed1, @u_proj, @u_remember, @u_company_name, @u_company_name, @formModel.telefon, @formModel.postadresse, @formModel.by, @formModel.organisasjonsnummer);
+               
+                /*
+                <p>Company @formModel.bedriftsnavn </p>(u_company_name) (u_company)
+                <p>email: @Request["email"]</p>(u_login)
+                @formModel.telefon             (u_phone)
+                @formModel.postadresse         (u_postcode) (u_postcode1) (u_poststed1) 
+                @formModel.by                  (u_city)     
+                @formModel.organisasjonsnummer  (u_orgnum)
+			    */
+                
+                <span> <input type="button" value="backto Kunde" onclick="window.location.href= '/kunde/kunde'" > </span> 
+		    }
+	    }
+    }*@
+  
+
+
+<div id="form-nyKunde">
+    @using (Html.BeginForm("Index", "Kunde", FormMethod.Post, new { id = "formkunde" , role="form"} ) ) 
+    { 
+	    <!-- form id="contactForm" action="" method="post" -->
+		
+			    <h3>Ny Kunde</h3>			
+			    <dl>
+				    <dt>
+					    <!-- label for="bedriftsnavn">Bedriftsnavn*</!-->
+                         @Html.LabelFor(p => p.Name)  
+				    </dt>
+				    <dd>
+					    <!-- input type="text" id="bedriftsnavn" class="required" name="bedriftsnavn" value="" maxlength="255" / -->
+                         @Html.TextBoxFor(m=>m.Name, new {Class="form-control",  Id="bedriftsnavn"}) 
+				    </dd>
+			    </dl>
+			
+			    <dl>
+				    <dt>
+					    <!--label for="email">E-post*</!label -->
+                        @Html.LabelFor(p=>p.Email )
+				    </dt>
+				    <dd>
+					    <!-- input type="email" id="email" class="required email" name="email" value="" maxlength="255" / -->
+                        @Html.TextBoxFor(m=>m.Email, new {Class="form-control", Id="email" } )
+
+				    </dd>
+			    </dl>
+
+                <dl>
+				    <dt>
+					    <!-- label for="telefon">Telefon*</!-->
+                        @Html.LabelFor(p=>p.Phone)
+
+				    </dt>
+				    <dd>
+					    <!-- input type="text" id="telefon" class="required telefon" name="telefon" value="" maxlength="255" / -->
+                        @Html.TextBoxFor(m=>m.Phone, new{Class="form-control"})
+				    </dd>
+			    </dl>
+
+                <dl>
+				    <dt>
+					    <!-- label for="postadresse">Postadresse*</label -->
+                        @Html.LabelFor(p=>p.Address)
+				    </dt>
+				    <dd>
+					    <!-- input type="text" id="postadresse" class="required postadresse" name="postadresse" value="" maxlength="255" / -->
+                        @Html.TextBoxFor(m=>m.Address, new{})
+				    </dd>
+			    </dl>
+
+                <dl>
+				    <dt>
+					    <!-- label for="by">By* </label -->
+                        @Html.LabelFor(p=>p.City)
+				    </dt>
+				    <dd>
+					    <!-- input type="text" id="by" class="required by" name="by" value="" maxlength="255" / -->
+                        @Html.TextBoxFor(m=>m.City, new{})
+				    </dd>
+			    </dl>
+
+                 <dl>
+				    <dt>
+					    <!-- label for="by">Organisasjonsnummer</label -->
+                         @Html.LabelFor(m=>m.OrganizationNumber)
+				    </dt>
+				    <dd>
+					    <!-- input type="text" id="organisasjonsnummer" class="organisasjonsnummer" name="organisasjonsnummer" value="" maxlength="255" / -->
+                        @Html.TextBoxFor(m=>m.OrganizationNumber)
+				    </dd>
+			    </dl>
+		
+		    <div>
+			    <input type="submit" name="submit-button" value="Submit" class="button" />
+		    </div>
+    }
+
+</div>

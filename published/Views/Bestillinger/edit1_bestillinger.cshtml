@@ -1,0 +1,337 @@
+﻿@using System.Web.Mvc;
+@using sandness_mvc4.Models.Nybestilling;
+@using sandness_mvc4.Models.Diplo;
+@using Conversive.PHPSerializationLibrary;
+@using System.Collections;
+@using System.Web.Helpers;
+@using NotWebMatrix.Data;
+
+@{    
+    Page.Title = "Betongbestilling " + @ViewBag.orderID;      
+   var db = Database.Open("sandness");       
+   /*
+    if( Session["username"] == null ) {
+           Response.Redirect("~/login/Index");
+    }
+    */   
+ }
+
+<h2 style="margin-bottom: 10px;">  @Page.Title</h2>
+@{
+    if(! string.IsNullOrEmpty( @Request.QueryString["status"] ) && Convert.ToInt32(@Request.QueryString["status"]) == 1){
+        switch( Convert.ToInt32( @Request.QueryString["status"] ) ){
+            case 1:
+              <h3> Status : Ubehandlede</h3>
+              break;
+            case 2:
+             <h3> Status : Kommende</h3>
+              break;
+              default:
+              break;
+        }
+        
+    }
+}
+
+<div id="nybestilling_form"> 
+    @{
+	    bool isPostBack = !String.IsNullOrEmpty(Request.Form["submit-button"]);
+	    var formModel = new NybestillingFormModel();
+
+	    if (!isPostBack)
+	    {         
+		    Session.Remove(NybestillingFormModel.SessionKey);	                              
+                @RenderForm(formModel)           
+	    }
+	    else
+	    {
+		    if (Session[NybestillingFormModel.SessionKey] != null)
+		    {
+			    @DisplayResubmissionError()
+			    return;
+		    }
+            
+		    formModel = new NybestillingFormModel(Request.Form);
+		    var errors = formModel.Validate();
+
+		    if (errors.Count > 0)
+		    {	
+			    @DisplayErrors(errors)
+			    @RenderForm(formModel)
+		    }
+		    else
+		    {
+                // update database
+                var now = DateTime.Now;                  
+                var timestamp = ByggeplassRepository.ToUnix(@now);
+                @DisplayCompletionMessage(formModel);                   
+                 db.Execute( "UPDATE [sandness].[dbo].[orders] set project=@0, notater=@1, lmin=@2, khour=@3, dato=@4, created=@5  WHERE id=@6",
+                 @formModel.project, @formModel.notater, @formModel.lmin, @formModel.khour, ByggeplassRepository.ConvertToUnixTimestamp(@formModel.date1.AsDateTime()).ToString(), @timestamp, @ViewBag.orderID);
+                  
+                  @*
+                   <p>
+                    @Request.QueryString["orderID"]
+                    proj: @formModel.project 
+                    notater :@formModel.notater
+                    lmin: @formModel.lmin
+                    khour: @formModel.khour
+                    date: ByggeplassRepository.ConvertToUnixTimestamp( @formModel.date1.AsDateTime()).ToString() 
+                    creat: @timestamp 
+                     </p> 
+                    *@
+                    foreach(var vals in Request.Form.AllKeys){
+                      if(@vals.Length > 7){
+                         if(@vals.Substring(0,7) == "values_"){                        
+                             foreach(var fid in @vals.Split('_')){
+                                if(@fid.IsInt()){  
+                                  //<p> @Request[@vals] - @fid </p>                                   
+                                    db.Execute("UPDATE [sandness].[dbo].[orderval] set created=@0, catid=@1, choice=@2 WHERE orderid=@3 and felt=@4", @timestamp, '0', @Request[@vals], @ViewBag.orderID, @fid);
+                                }
+                              }
+                           }
+                       }            
+                    }   
+                                               
+                    <span> <input type="button" class="btn btn-default" value="backto bestilliner" onclick="window.location.href= '/bestillinger/index'" > </span>                
+           }
+        }
+     }
+    </div>
+
+@helper RenderForm(NybestillingFormModel form)
+{  
+ var db = Database.Open("sandness");
+ var order = db.QuerySingle("Select * from [sandness].[dbo].[orders] where id= @0", @ViewBag.orderID );
+ //var proj_name = db.QueryValue( "select name from [sandness].[dbo].[projects] where id=@0", @order.project );
+ var kunde = db.QueryValue( "select u_company from [sandness].[dbo].[user] where u_id=@0", @order.kunde );     
+ var formUserfields = ByggeplassRepository.getFormUserfield();   
+ /* get project*/
+  var u_proj = db.QueryValue("SELECT u_proj FROM [sandness].[dbo].[user] WHERE u_id=@0",order.userid);          
+    var proObj = new Serializer();
+    var pro_id = "";
+    var projects_unserialize_arr = proObj.Deserialize(@u_proj); 
+    ArrayList proj_ids = new ArrayList(); 
+    foreach(var proID in @projects_unserialize_arr){        
+          proj_ids.Add( @proID);          
+        }
+       var i =1;
+       var ids = "0";
+    foreach(var id in proj_ids){
+          if( @proj_ids.Count == @i ){
+             ids += id ;
+          }else {
+            ids += id + ",";
+          }
+
+         i++;
+     }
+      
+     var  proj_names = db.Query("select id,name from [sandness].[dbo].[projects] where id IN("+ @ids +")");     
+     var dato = ByggeplassRepository.UnixTimeStampToDateTime( Convert.ToDouble( @order.dato ) );
+     var getfieldfortable = ByggeplassRepository.getfieldfortable();
+     var ordval_data = db.Query("SELECT * FROM [sandness].[dbo].[orderval] WHERE orderid =@0", @ViewBag.orderID );
+     var checkedRadio = "";
+     var selected ="";
+     
+     <form id="nybestilling_form" action="" method="post">
+		    <fieldset>
+			    <legend>Nybestilling </legend>			    
+                <div>
+                    <span> <label> Kunde : @kunde</label></span>                    
+                    <span> <label style="padding-bottom: 8px;padding-top: 1px;"> Byggeplass </label></span>
+                    <span>
+                  <select id="" name="project" >                       
+                     @if( !string.IsNullOrEmpty( @ids ) ){ 
+                        
+                        foreach( var pro in @proj_names)
+				        {                               
+                            if( Convert.ToInt32(pro.id) == Convert.ToInt32( order.project ) ){
+                               selected = "selected";
+                             } else 
+                             { selected = "";}                                                                
+				            <option @selected value="@pro.id" >@pro.name </option>         
+                        }
+                     }
+			       </select>
+                    </span>
+                </div>
+
+                <div>
+                    <span> <label class= "nybestilling_lbl"> Leveringsdato </label> </span>
+                    <span> 
+                        <input type="text" name="date1" id="date2" value="@String.Format("{0:dd-MM-yyyy}",@dato)" >
+                        
+                    </span>
+                </div>
+
+                
+               <div>
+				    <span>
+					    <label for="khour"> Klokkeslett levering(ex. 12,30) </label>
+				    </span>
+				    <span>
+					    <input type="text" id="khour"  name="khour" size="10"  maxlength="255"  value="@order.khour" />
+				    </span>
+			    </div>
+                <div>  
+                   
+                    @foreach (var field in getfieldfortable)
+	                {
+                       var feltval= "";           
+          
+                       foreach( var ordv_data in ordval_data ){                  
+                             if(@ordval_data !=null && @field.id == Convert.ToInt32( @ordv_data.felt ) ){ 
+                                    switch( (int) @field.type){
+                                        case 1: 
+                                            <span> <label class= "nybestilling_lbl"> @field.name </label> </span>                                 
+                                            <span> <input type="text" name="values_@field.id" value="@ordv_data.choice" /> </span>   
+                                        break;
+
+                                        case 2:
+                                            var get_drop = db.Query("SELECT * FROM dropdowns WHERE did=@0 ORDER BY ord DESC", @field.id);
+                                            <span> <label class= "nybestilling_lbl"> @field.name </label> </span>
+                                            <span class="input_nybestilling">
+                                                <select name="values_@field.id">
+                                                    <option value='-1'> - Select -  </option>    
+                                                        @foreach( var ds in get_drop ){ 
+                                                                                           
+                                                        <option value='@ds.id'  > @ds.name </option>                                                                
+                                                        }  
+                                                </select>
+                                            </span>                         
+                                        break;
+                            
+                                        case 3:
+                                            var get_radio = db.Query("SELECT * FROM choices WHERE feltid=@0 ORDER BY ord DESC", @field.id);
+                                            <span> <label class= "nybestilling_lbl"> @field.name </label> </span>
+                                            <span class="input_nybestilling">
+                                              @foreach( var rs in get_radio ){    
+                                                  if( Convert.ToInt32(rs.id) == Convert.ToInt32( ordv_data.choice ) ){
+                                                      checkedRadio = "checked";
+                                                  } else 
+                                                  { checkedRadio = "";}                           
+                                                <input type='radio' @checkedRadio  name='values_@field.id' value='@rs.id' style="width: 30px;" /> @rs.name                                                                
+                                              }  
+                                            </span>                                                
+                                       break;
+
+                                      default:
+                                      break;
+                                   }
+	                         }
+                        }
+                    }
+
+                    <span> <label>Tid mellom leveransene </label> </span>                                 
+                    <span> 
+                         <input type="text" name="lmin" value="@order.lmin" /> minutter                               
+                    </span>
+                   
+                    <span> <label> Notater </label> </span>                                 
+                    <span> 
+                         <textarea name="notater"> @order.notater </textarea>                             
+                    </span>
+                </div>
+                
+              </fieldset>
+		    <div>
+			    <input type="submit" name="submit-button" value="Lagre bestilling" class="btn btn-default" />
+		    </div>
+    </form>
+}
+
+@helper DisplayErrors(IEnumerable<string> errors)
+{
+	<h3>Oops!</h3>
+	
+	<p>Please fix the following problems and try again:</p>
+	
+	<ul>
+		@foreach (var error in errors)
+		{
+			<li>@error</li>
+		}
+	</ul>
+}
+
+@helper DisplayCompletionMessage(NybestillingFormModel formModel)
+{
+    var db = Database.Open("sandness");
+    var feltval="";
+	<p>
+		Thank you, your order has been successfully updated!
+	</p>
+	
+	<p>
+		The order you  updated:
+	</p>
+	
+	<table>
+		<tr>
+			<td>Byggeplass</td><td>@formModel.project</td>
+		</tr>
+        <tr>
+			<td>Leveringsdato </td><td>@formModel.date1</td>
+		</tr>
+		<tr>
+			<td>Klokkeslett levering(ex. 12,30)</td><td>@formModel.khour</td>
+		</tr>
+
+        @foreach(var vals in Request.Form.AllKeys){
+           feltval ="";
+           if(@vals.Length > 7){
+              if(@vals.Substring(0,7) == "values_"){                        
+                 foreach(var fid in @vals.Split('_')){
+                    if(@fid.IsInt()){                            
+                          var felter_data = db.QuerySingle( "SELECT * FROM [sandness].[dbo].[felters] WHERE id=@0",@fid );
+                          //<p> @fid  - @felter_data.type</p>
+                          switch( Convert.ToInt32( (int) @felter_data.type ) ){
+                             case 1:
+                                feltval = @Request[@vals];
+                                break;
+                                       
+                             case 2:                                       
+                                feltval = db.QueryValue( "SELECT name FROM [sandness].[dbo].[dropdowns] WHERE id=@0", @Request[@vals] );                                        
+                                break;
+
+                            case 3:                                       
+                                feltval = db.QueryValue( "SELECT name FROM [sandness].[dbo].[choices] WHERE  id=@0", @Request[@vals] );
+                                break;
+
+                            default:
+                            break;
+
+                          } // end switch
+
+                          <tr>
+                            <td> @felter_data.name </td> <td> @feltval  </td>
+                         </tr>                        
+                     }
+                     
+                  }
+                }
+             }            
+           }  
+              
+          <tr>
+			 <td>Tid mellom leveransene</td><td>@formModel.lmin</td>
+		  </tr>        
+        
+        <tr>
+			<td>Notater</td><td>@formModel.notater</td>
+		</tr>
+		
+	</table>
+	
+	<p>Note: If you try and reload the page the form won't be resubmitted.</p>
+	
+	Session.Add(NybestillingFormModel.SessionKey, true); // set session variable to indicate form has been submitted
+}
+
+@helper DisplayResubmissionError()
+{
+  <div class="ResubmissionError">	
+    <h3>Oops!</h3>
+	<p>You are trying to submit the form again!</p>
+  </div>
+}

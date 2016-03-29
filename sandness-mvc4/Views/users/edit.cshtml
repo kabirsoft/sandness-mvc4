@@ -1,0 +1,167 @@
+﻿@model sandness_mvc4.Models.users.userFormModel
+@using System.Web.Mvc;
+@using System.Web.Helpers;
+@using System.Collections;
+@using sandness_mvc4.Models.Diplo;
+@using sandness_mvc4.Models.users;
+@using NotWebMatrix.Data;
+@{    
+    Page.Title = "Endre bruker";
+    var db = Database.Open("SolaBetong");
+}
+@{  
+    var usergroup = ByggeplassRepository.getUserGroup();
+    var kunder = ByggeplassRepository.GetKunde();
+    var projects = ByggeplassRepository.GetProjectsWithUserIdCustId(@Model.Id, @Model.customerId);
+    var roller = ByggeplassRepository.getrolle();
+    var selected ="";
+    var checked_pro = "";
+
+    } 
+
+@using (Html.BeginForm("Edit", "Users", FormMethod.Post, new { id = "", role = "form" }))
+{
+
+		<fieldset>
+			<legend>Endre bruker</legend>
+             <dl>
+				<dt>
+					<!-- label for="u_fname">Fornavn*</!-->
+                    @Html.LabelFor(m=>m.FirstName)
+				</dt>
+				<dd>
+					<!-- input type="text" id="u_fname" class="required" name="FirstName" value="Model.FirstName" maxlength="255" / -->
+                    @Html.TextBoxFor(m => m.FirstName, new { id="u_fname", Name="FirstName", Class="required", value=@Model.FirstName} )
+
+				</dd>
+			</dl>
+            <dl>
+				<dt>
+					<!--  label for="u_lname">Etternavn*</label -->
+                    @Html.LabelFor(m=>m.LastName)
+				</dt>
+				<dd>
+					<!-- input type="text" id="u_lname" class="required" name="LastName" value="Model.LastName" maxlength="255" / -->
+                    @Html.TextBoxFor(m => m.LastName, new { id="u_lname", Name="LastName",  value=@Model.LastName} )
+				</dd>
+			</dl>			
+			<dl>
+				<dt>
+					<!-- label for="u_mail">E-post*</! -->
+                    @Html.LabelFor(m=>m.Email)
+				</dt>
+				<dd>
+					<!-- input type="email" id="u_mail" class="required u_mail" name="Email" value="Model.Email" maxlength="255" / -->
+                    @Html.TextBoxFor(m => m.Email, new { id="u_mail", Name="Email", Class="required", value=@Model.Email} )
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<!-- label for="u_phone">Mobiltelefon*</  -->
+                    @Html.LabelFor(m=>m.Mobile)
+				</dt>
+				<dd>
+					<!-- input type="text" id="u_phone" class="required u_phone" name="Mobile" value="Model.Mobile" maxlength="255" / -->
+                    @Html.TextBoxFor(m => m.Mobile, new { id="u_phone", Name="Mobile", value=@Model.Mobile } )
+				</dd>
+			</dl>            
+            <dl>
+				<dt>
+					<label for="u_group">Gruppe</label>
+				</dt>
+				<dd>
+					<select id="u_group" name="UserGroupId">
+                         						
+						@foreach (var group in usergroup)
+						{
+                            if( @Model.UserGroupId == group.Id){  
+                                selected = "selected"; 
+                                }else{
+                                    selected = "";
+                                }
+							<option value="@group.Id" @selected>@group.GroupName</option>
+						}
+					</select>
+				</dd>
+			</dl>
+            <dl>
+				<dt>
+					<label for="u_company_name">Kunder</label>
+				</dt>
+				<dd>
+					<select id="u_company_name" name="CustomerId" >
+                         						
+						@foreach (var kunde in kunder)
+						{
+                            if( @Model.customerId == @kunde.Id){  
+                                selected = "selected"; 
+                                }else{
+                                    selected = "";
+                                }
+							<option value="@kunde.Id" @selected> @kunde.Name</option> 
+						}
+					</select>
+				</dd>
+			</dl>			
+			
+             <dl>
+				<dt>
+					<label for="project">Projekter</label>
+				</dt>
+				<dd>
+
+				    @foreach (var project in projects)
+                    {
+                        checked_pro = "";
+                       if( @Model.Id == project.UserId )
+                       {                     
+                        checked_pro = "checked";
+                       }
+                     <input type="checkbox" @checked_pro id="project_@project.Id"  name="project_@project.id" value=@project.id maxlength="255"> @project.name <br />				
+                    }
+                </dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="u_pass">Passord*</label >
+                    
+				</dt>
+				<dd>
+					<input type="password" id="u_pass" class="required" name="password" value="" maxlength="255" / >
+                    
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="con_password">Gjenta Passord*</label>
+				</dt>
+				<dd>
+					<input type="password" id="con_password" class="required" name="con_password" value="" maxlength="255" />
+				</dd>
+			</dl>
+            <dl>
+				<dt>
+					<label for="u_rolle">Rolle</label>
+				</dt>
+				<dd>
+					<select id="u_rolle" name="rollId">                         						
+						@foreach (var rolle in roller)
+						{
+                            if( @Model.rollId == rolle.id ){  
+                                selected = "selected"; 
+                                }else{
+                                    selected = "";
+                                }
+							<option value="@rolle.Id" @selected> @rolle.Name</option>
+						}
+					</select>
+				</dd>
+			</dl>
+		</fieldset>
+		<div>
+			<input type="submit" name="submit-button" value="Submit" class="button" />
+		</div>	
+}

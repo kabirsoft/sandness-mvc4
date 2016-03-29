@@ -1,0 +1,317 @@
+﻿@using System.Web.Mvc;
+@using sandness_mvc4.Models.users;
+@using sandness_mvc4.Models.Diplo;
+@using System.Net.Mail;
+@using NotWebMatrix.Data;
+ 
+
+@{    
+    Page.Title = "Bruker";
+    var db = Database.Open("SolaBetong");    
+    
+ }
+
+
+<div id="newuser">
+    <span class="user"> @Page.Title </span> <span class="plus"> + </span>       
+</div>
+
+
+    @*{
+        bool isPostBack = !String.IsNullOrEmpty(Request.Form["submit-button"]);
+        var formModel = new userFormModel();
+
+        if (!isPostBack)
+        {
+            Session.Remove(userFormModel.SessionKey);
+		   <div class="form-new-user">
+                @RenderForm(formModel)
+            </div>
+        }
+        else
+        {
+            if (Session[userFormModel.SessionKey] != null)
+            {
+			    @DisplayResubmissionError()
+                return;
+            }
+
+            formModel = new userFormModel(Request.Form);
+            int email_check = db.QueryValue("Select count(u_mail) from [sandness].[dbo].[user] where u_login= @0", @formModel.u_mail);
+            var errors = formModel.Validate(email_check);
+
+            if (errors.Count > 0)
+            {	
+			    @DisplayErrors(errors)
+			    @RenderForm(formModel)
+            }
+            else
+            {
+                @DisplayCompletionMessage(formModel);
+                                                    // insert into database
+                                                    /*
+                                                    <p>fornavn   : @formModel.u_fname</p>
+                                                    <p>Etternavn : @formModel.u_lname</p>
+                                                    <p>E-post    : @formModel.u_mail</p>
+                                                    <p>Mobile    : @formModel.u_phone</p>
+                                                    <p>Group     : @formModel.u_group</p>
+          
+                                                    <p>Kunder    : @formModel.u_company_name</p>
+                
+                 
+                                                    <p> Password: @formModel.u_pass </p>
+                                                    <p> Rolle: @formModel.u_rolle </p>
+                                                     */
+                                                    var company_user = @formModel.u_fname;
+                                                    // because database not null below 6 field
+                                                    var account_type = 2;
+                                                    var u_active = 0;
+                                                    var u_postcode1 = "test";
+                                                    var u_poststed1 = "test";
+                                                    var u_proj = "test";
+                                                    var u_remember = 0;
+
+                                                    var adminid = ByggeplassRepository.getAdminId(@Session["username"].ToString());
+                                                    var u_company_name = ByggeplassRepository.getCompanyName(@formModel.u_company_name.AsInt());
+
+                                                    db.Execute("INSERT INTO [sandness].[dbo].[user] (u_fname,u_lname,u_adminid, u_pass, u_login, u_mail, u_phone, u_rolle, u_company, u_company_name, u_group, account_type, u_active, u_postcode1, u_poststed1, u_proj, u_remember) VALUES (@0, @1, @2, @3, @4, @5, @6, @7,@8, @9,@10,@11,@12,@13,@14,@15,@16)",
+                                                    @formModel.u_fname, @formModel.u_lname, @adminid, @formModel.u_pass, @formModel.u_mail, @formModel.u_mail, @formModel.u_phone, @formModel.u_rolle, @company_user, @u_company_name, @formModel.u_group, @account_type, @u_active, @u_postcode1, @u_poststed1, @u_proj, @u_remember);
+
+                                                    // for email send
+
+                                                    WebMail.SmtpServer = "smtp.gmail.com";
+                                                    WebMail.SmtpPort = 25;
+                                                    WebMail.EnableSsl = true;
+                                                    WebMail.UserName = "bahalul@gmail.com";
+                                                    WebMail.Password = "abcdef28";
+                                                    WebMail.From = "mohammad.kabir@knowit.no";
+
+                                                    // Send email
+                                                    WebMail.Send(to: @formModel.u_mail,
+                                                        subject: "No reply",
+                                                        body: "Your user name: " + @formModel.u_mail + " and \n password :" + @formModel.u_pass
+                                                    );
+
+                                                    var email_m = " An email has been sent with username and password";
+                <p>  @email_m </p>
+                <span style="margin-left: 295px;"> <input type="button" value="backto users" onclick="window.location.href= '/users/users'" > </span>                 
+                // email send end    
+            }
+        }
+    }
+  </div>
+    *@
+<div id="form-new-user"> 
+  @using (Html.BeginForm("Index", "Users", FormMethod.Post, new { id = "", role = "form" }))
+  {
+      var usergroup = ByggeplassRepository.getUserGroup();
+      var kunder = ByggeplassRepository.GetKunde();
+      var roller = ByggeplassRepository.getrolle();
+      var selected = "";
+	<!-- form id="contactForm1" action="" method="post" -->
+		<fieldset>
+			<legend>Endre bruker</legend>
+             <dl>
+				<dt>
+					<label for="u_fname">Fornavn*</label>
+				</dt>
+				<dd>
+					<input type="text" id="u_fname" class="required" name="FirstName" value="" maxlength="255" />
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="u_lname">Etternavn*</label>
+				</dt>
+				<dd>
+					<input type="text" id="u_lname" class="required" name="LastName" value="" maxlength="255" />
+				</dd>
+			</dl>
+			
+			<dl>
+				<dt>
+					<label for="u_mail">E-post*</label>
+				</dt>
+				<dd>
+					<input type="email" id="u_mail" class="required u_mail" name="Email" value="" maxlength="255" />
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="u_phone">Mobiltelefon*</label>
+				</dt>
+				<dd>
+					<input type="text" id="u_phone" class="required u_phone" name="Mobile" value="" maxlength="255" />
+				</dd>
+			</dl>
+            
+            <dl>
+				<dt>
+					<label for="u_group">Gruppe</label>
+				</dt>
+				<dd>
+					<select id="u_group" name="UserGroupId">
+                      @foreach (var group in usergroup)
+                      {
+                          @*if (group.ug_id == Convert.ToInt32(@form.UserGroup))
+                          {
+                              selected = "selected";
+                          }
+                          else
+                          {
+                              selected = "";
+                          } *@                          
+							<option value="@group.Id" @selected>@group.GroupName</option>
+                      }   						
+						
+					</select>
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="u_company_name">Kunder</label>
+				</dt>
+				<dd>
+					<select id="u_company_name" name="CustomerId">
+                        <option value="-1"> - Select   kunde -</option> 						
+						@foreach (var kunde in kunder)
+                          {
+                              @*if (kunde.u_id == Convert.ToInt32(@form.u_company_name))
+                              {
+                                  selected = "selected";
+                              }
+                              else
+                              {
+                                  selected = "";
+                              }*@
+							<option @selected value="@kunde.Id">@kunde.Name </option> 
+                          } 						
+						
+					</select>
+				</dd>
+			</dl>			
+			
+             <dl>
+				<dt>
+					<label for="project">Projekter</label>
+				</dt>
+				<dd>
+				   
+                </dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="u_pass">Passord*</label>
+				</dt>
+				<dd>
+					<input type="password" id="u_pass" class="required" name="Password" value="" maxlength="255" />
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="con_password">Gjenta Passord*</label>
+				</dt>
+				<dd>
+					<input type="password" id="con_password" class="required" name="con_password" value="" maxlength="255" />
+				</dd>
+			</dl>
+            <dl>
+				<dt>
+					<label for="u_rolle">Rolle</label>
+				</dt>
+				<dd>
+					<select id="u_rolle" name="rollId">
+                         @foreach (var rollesql in roller)
+                         {  @*
+                             if (rollesql.id == Convert.ToInt32(@form.u_rolle))
+                             {
+                                 selected = "selected";
+                             }
+                             else
+                             {
+                                 selected = "";
+                             } *@
+                              
+							<option @selected value="@rollesql.Id"> @rollesql.Name</option>
+                         }						
+						
+					</select>
+				</dd>
+			</dl>
+		</fieldset>
+		<div>
+			<input type="submit" name="submit-button" value="Submit" class="button" />
+		</div>
+	}
+</div>
+@{  
+    /* delete user */
+    if (!String.IsNullOrEmpty(UrlData[0]))
+    {
+
+        // <p> ID: UrlData[0] </p>
+        db.Execute("delete from [sandness].[dbo].[user] where Id=@0", UrlData[0]);
+        Response.Redirect(@Request.UrlReferrer.ToString());
+    }
+}
+
+
+
+@{
+    var usersList = ByggeplassRepository.userList();
+    var columns = new[] { "Firstname", "LastName", "GroupName", "Name" };
+    //var grid = new WebGrid(usersList, columnNames : columns, ajaxUpdateContainerId: "grid",rowsPerPage:20);
+    var grid = new WebGrid(usersList, columnNames: columns, rowsPerPage: 20);
+
+ }
+
+<div id="grid">
+
+     @grid.GetHtml(
+     tableStyle: "table table-hover",
+     alternatingRowStyle: "alternate",
+     headerStyle: "header",
+
+     numericLinksCount: 4,
+
+    columns: grid.Columns(
+        grid.Column(
+            columnName: "FirstName",
+            header: "Navn",
+            canSort: true,
+             //style : "disabled",
+            format: @<a class="bygge_id" href="@Href("/users/edit_user/" + @item.Id)"> @item.FirstName </a>
+         ),
+         grid.Column(
+            columnName: "LastName",
+            header: "Etternavn",
+            canSort: true,
+             //style : "disabled",
+            format: @<a class="bygge_id" href="@Href("/users/edit_user/" + @item.Id)"> @item.LastName </a>
+         ),
+        grid.Column(
+            columnName: "GroupName",
+             header: "Kunder",
+             canSort: true
+             //format: @<a class="bygge_name" href="@Href("/Byggeplass/edit_project/" + @item.id)"> @item.name </a>
+        ),
+        grid.Column(
+            columnName: "Name",
+             header: "Rolle"
+        ),
+        grid.Column(
+            columnName: "",
+            header: "Edit|slett",
+            canSort: false,
+            style: "edit_delete",
+            format: @<text><div style="width: 60px;"><a style="text-decoration: none;" href="@Href("/users/edit_user/" + @item.Id)"> <span class="glyphicon glyphicon-edit"> </span> </a>  <a id="@item.Id" href="@Href("/users/users/" + @item.Id)" onclick="return confirm('Are u sure to delete : @item.FirstName ??')"> <span class="glyphicon glyphicon-trash"></span> </a> </div></text>    
+        )
+      )
+    )
+
+</div>

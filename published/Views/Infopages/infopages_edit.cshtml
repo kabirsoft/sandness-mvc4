@@ -1,0 +1,63 @@
+﻿@using System.Web.Mvc;
+@using sandness_mvc4.Models.Diplo;
+@using NotWebMatrix.Data;
+
+@{    
+   Page.Title = "Edit Infopages";      
+   var db = Database.Open("SolaBetong");    
+   /*
+    if( Session["username"] == null ) {
+           Response.Redirect("~/login/index");
+    }*/
+ }
+
+@{
+    var t_code = "";
+   if(! string.IsNullOrEmpty(Request.Form["edit_best_id"]) ){                 
+         var get_t_code = ByggeplassRepository.get_t_code( Convert.ToInt32(Request.Form["edit_best_id"] ));
+         foreach(var val in get_t_code){
+             t_code = @val.t_code;
+         }
+         db.Execute("UPDATE [SolaBetong].[dbo].[textcodes] set t_val=@0 WHERE t_code=@1", @Request.Form["bestil_edit_title"],@t_code );
+         db.Execute("UPDATE [SolaBetong].[dbo].[infopages] set text=@0 WHERE Id=@1", @Request.Form["bestil_edit_txt"],@Request.Form["edit_best_id"] );
+         <p> Data has been successfully updated ! </p>
+        
+    }
+}
+
+ @{       
+            //var i_id  = UrlData[0];
+            var i_id  =  ViewBag.ID;
+            var t_val = "";
+            var i_text = "";
+            var infopages_edit = ByggeplassRepository.infopages_data( Convert.ToInt32( @i_id ) );
+            foreach(var info in infopages_edit){
+                t_val = info.t_val;
+                i_text = info.text;
+                
+
+                <div>             
+                    <form method="post">
+                        <input type="hidden" name="edit_best_id" value="@ViewBag.ID">
+                        <dl>
+                           <dt>
+                            Title
+                          </dt>
+                         <dd>
+                             <input type="text" name="bestil_edit_title" value="@t_val">
+                         </dd>
+                         <dt> Tekst  </dt>
+             
+                         <dd><textarea name="bestil_edit_txt"  rows="5" cols="57"> @i_text </textarea>   </dd>
+                   
+                        </dl>
+                         <span style="margin-left: 295px;"> <input type="button" value="backto infopages" onclick="window.location.href = '/infopages/Index'" > </span> 
+                         <span style="margin-left: 2px;"><input type="submit" name="edit_infopages" value="Oppdater"> </span>
+                    </form> 
+                </div>
+
+           }
+        
+  }
+        
+        

@@ -1,0 +1,130 @@
+﻿@model sandness_mvc4.Models.Kunde.KundeViewModel
+@using System.Web.Mvc;
+@using sandness_mvc4.Models.Kunde;
+@using sandness_mvc4.Models.Diplo;
+@using NotWebMatrix.Data;
+
+@{    
+    Page.Title = "Edit Kunde";
+    var db = Database.Open("SolaBetong");
+}
+
+@*
+<div id="formkunde"> 
+    @{
+	    bool isPostBack = !String.IsNullOrEmpty(Request.Form["submit-button"]);
+	    var formModel = new KundeFormModel();
+
+	    if (!isPostBack)
+	    {
+		    Session.Remove(KundeFormModel.SessionKey);		   
+                @RenderForm(formModel)           
+	    }
+	    else
+	    {
+		    if (Session[KundeFormModel.SessionKey] != null)
+		    {
+			    @DisplayResubmissionError()
+			    return;
+		    }
+
+		    formModel = new KundeFormModel(Request.Form);
+		    var errors = formModel.Validate();
+
+		    if (errors.Count > 0)
+		    {	
+			    @DisplayErrors(errors)
+			    @RenderForm(formModel)
+		    }
+		    else
+		    {
+                // Update database
+               
+
+                @DisplayCompletionMessage(formModel);
+                /*
+                <p>ID: @UrlData[0] </p>
+                <p> Bedriftsnavn: @formModel.bedriftsnavn </p>               
+                <p> email: @formModel.email   </p>
+                <p> tele: @formModel.telefon </p>
+                <p> city: @formModel.by </p>
+                <p> org: @formModel.organisasjonsnummer </p>
+                    <p> Postaddress : @formModel.postadresse  </p>
+                 var company_name = @formModel.bedriftsnavn;
+                */
+
+                                                    db.Execute("UPDATE [sandness].[dbo].[user] SET u_company_name =  @0, u_login=@1, u_phone =@2, u_postcode = @3, u_city = @4, u_orgnum = @5 WHERE u_id = @6", @formModel.bedriftsnavn, @formModel.email, @formModel.telefon, @formModel.postadresse, @formModel.by, @formModel.organisasjonsnummer, ViewBag.KundeID);
+                <span> <input type="button" value="backto Kunde" onclick="window.location.href = '/kunde/kunde'" > </span> 
+            }
+	    }
+    }
+  </div>
+*@
+
+@using (Html.BeginForm("Edit", "Kunde", FormMethod.Post, new { id = "formkunde" , role="form"} ) ) 	
+{	
+		<fieldset>
+			<legend>Edit Kunde</legend>
+			
+			<dl>
+				<dt>					
+                    @Html.LabelFor(p => p.Name) 
+				</dt>
+				<dd>					
+                    @Html.TextBoxFor(m=>m.Name, new {Class="form-control",  Id="bedriftsnavn" , Value = @Model.Name}) 
+				</dd>
+			</dl>
+			
+			<dl>
+				<dt>					
+                    @Html.LabelFor(p=>p.Email )
+				</dt>
+				<dd>					
+                    @Html.TextBoxFor(m=>m.Email, new {Class="form-control", Id="email" , Value=@Model.Email } )
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>					
+                    @Html.LabelFor(p=>p.Phone)
+				</dt>
+				<dd>					
+                    @Html.TextBoxFor(m=>m.Phone, new{Class="form-control" , value = @Model.Phone})
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>					
+                    @Html.LabelFor(p=>p.Address)
+				</dt>
+				<dd>					
+                    @Html.TextBoxFor(m=>m.Address, new{ Class="form-control" , value = @Model.Address })
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					 @Html.LabelFor(p=>p.City)
+				</dt>
+				<dd>
+					 @Html.TextBoxFor(m=>m.City, new{ Class="form-control", value = @Model.City })
+				</dd>
+			</dl>
+
+             <dl>
+				<dt>
+					 @Html.LabelFor(m=>m.OrganizationNumber)
+				</dt>
+				<dd>
+					<input type="text" id="organisasjonsnummer" class="organisasjonsnummer" name="organisasjonsnummer" value="" maxlength="255" />
+                    @Html.TextBoxFor(m=>m.OrganizationNumber, new{ Class="form-control", value = @Model.OrganizationNumber })
+				</dd>
+			</dl>
+			
+			
+			
+		</fieldset>
+		<div>
+			<input type="submit" name="submit-button" value="Submit" class="button" />
+		</div>	
+}

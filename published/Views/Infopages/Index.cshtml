@@ -1,0 +1,79 @@
+﻿@using System.Web.Mvc;
+@using sandness_mvc4.Models.Diplo;
+@using NotWebMatrix.Data;
+
+
+@{    
+    Page.Title = "Infopages";      
+   var db = Database.Open("SolaBetong");    
+ }
+
+
+
+@*{ 
+
+    if(! string.IsNullOrEmpty( Request.Form["infopage_new"])){
+        //@Guid.NewGuid().ToString("N").Substring(0, 7)
+        var t_code_id      = Guid.NewGuid().ToString("N").Substring(0, 7);
+        var info_new_title    = @Request.Form["info_new_title"];
+        var info_new_text     = @Request.Form["info_new_text"];
+        var date              = @String.Format("{0: yyyy-MM-dd hh:mm:ss}", @DateTime.Now);
+
+        db.Execute("INSERT INTO [sandness].[dbo].[textcodes](L_id, t_code, t_val )VALUES (@0, @1, @2)", 1, @t_code_id, @info_new_title);
+        db.Execute("INSERT INTO [sandness].[dbo].[infopages] (i_title, i_text, i_date, i_title1) values(@0,@1,@2,@3)", @t_code_id, @info_new_text, @date, "" );
+        Response.Redirect("~/infopages/index");
+    }
+
+    if(! string.IsNullOrEmpty( Request.QueryString["delinfopages_id"] ) ){
+          var t_code = "";
+         var get_t_code = ByggeplassRepository.get_t_code( Convert.ToInt32( @Request.QueryString["delinfopages_id"]  ));
+         foreach(var val in get_t_code){
+             t_code = @val.t_code;
+         }
+         <p>tcode: @t_code</p>
+        db.Execute( "DELETE FROM [sandness].[dbo].[textcodes] WHERE t_code=@0",@t_code );
+        db.Execute( "DELETE FROM [sandness].[dbo].[infopages] WHERE i_id=@0",@Request.QueryString["delinfopages_id"] );
+        Response.Redirect("~/infopages/index");
+    }
+}*@
+
+<div id="infopages">   
+    
+    <!-- new infopages-->
+
+    <span class="infopage_title">   @Page.Title  </span> <span class="plus"> +  </span>
+
+     <div class="form_nyinfopage">
+         <form method="POST">
+             <dl>
+                 <dt> Tittel   </dt>
+                 <dd>
+                     <input type="text" name="info_new_title">
+                 </dd>
+                 <dt> Tekst </dt>
+                 <dd> 
+                     <textarea name="info_new_text" rows="5" cols="57">  </textarea>
+                 </dd>
+                 <dd style="margin-left: 485px;"><input type="submit" name="infopage_new" value="Lagre"> </dd>
+             </dl>
+             
+         </form>
+     </div>
+    <!-- End nyinfo pages-->
+    <div class="infopages_list">
+        @{
+             var get_infopages_data = ByggeplassRepository.get_infopages_data();
+                foreach(var info in get_infopages_data){
+                    var t_val1 = info.t_val;
+                    var i_text1 = info.text;    
+                   <div>
+                     <span> <a href="@Href("/infopages/infopages/?delinfopages_id=" + @info.Id)" onclick="return confirm('Are u sure to delete : @info.t_val ??')"> <span class="glyphicon glyphicon-trash"> </span> </a> </span>      
+                     <span> <a href="/infopages/infopages_edit/@info.Id"> <span class="glyphicon glyphicon-edit"></span> </a></span>
+                     <span> <a href="/infopages/infopages_edit/@info.Id"> @t_val1 </a></span>             
+                   </div>
+                }
+         }
+     </div>
+</div>
+
+   

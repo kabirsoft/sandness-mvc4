@@ -1,0 +1,200 @@
+﻿@using System.Web.Mvc;
+@using  sandness_mvc4.Models.Diplo;
+@using sandness_mvc4.Models.users;
+@using System.Net.Mail;
+@using NotWebMatrix.Data;
+
+@{
+    var db = Database.Open("SolaBetong");    
+    Page.Title = "Instillinger";
+    
+    if( Session["username"] == null ) {
+           Response.Redirect("~/login/index");
+    }
+
+    Session.Remove("currentMenu");
+    Session["currentMenu"] = "instillinger";
+}
+
+@{
+   var display="display:none";
+
+   if(! string.IsNullOrEmpty( Request.Form["submit-pass"] )){
+        List<string> errors = new List<string>();
+        if(string.IsNullOrEmpty( Request.Form["new_passwd"] ) ){
+          errors.Add("Enter Password");   
+        }
+        if(string.IsNullOrEmpty( Request.Form["con_passwd"] ) ){
+          errors.Add("Enter confirm Password");   
+        }
+        if( Request.Form["con_passwd"] != Request.Form["new_passwd"] ){
+            errors.Add("Password and confirm password does not match");   
+        }
+        if (errors.Count > 0){
+            display="display:block";
+         <ul>
+		    @foreach (var error in errors)
+		    {
+			    <li style="color: red;">@error</li>
+		    }
+	    </ul>
+
+        }else{
+                db.Execute("UPDATE [sandness].[dbo].[user] set u_pass=@0  WHERE u_login=@1",@Request.Form["new_passwd"], @Session["username"]);       
+                <p> Your password has been updated</p>
+        }
+    } // end if new password
+     var display_email="display:none";
+    if(! string.IsNullOrEmpty( Request.Form["submit-email"] )){
+        List<string> errors = new List<string>();
+        if(string.IsNullOrEmpty( Request.Form["new_email"] ) ){
+          errors.Add("Enter email");   
+        }else
+			{
+				try
+				{
+					MailAddress address = new MailAddress(Request.Form["new_email"]);
+				}
+				catch (FormatException)
+				{
+					errors.Add("Your email address was not in the correct format");
+				}
+			}
+
+        if(string.IsNullOrEmpty( Request.Form["con_email"] ) ){
+          errors.Add("Enter confirm email");   
+        }
+        if( Request.Form["con_email"] != Request.Form["new_email"] ){
+            errors.Add("Email and confirm email does not match");   
+        }
+        var u_id = db.QueryValue("select u_id FROM [sandness].[dbo].[user] WHERE u_mail=@0", @Session["username"]);
+        int email_check = db.QueryValue("Select count(u_mail) from [sandness].[dbo].[user] where u_mail= @0 and u_id !=@1", @Request.Form["new_email"], @u_id);
+        if(@email_check > 0){
+            errors.Add("This e-post already exist!");
+        }
+        if (errors.Count > 0){
+            display_email="display:block";
+         <ul>
+		    @foreach (var error in errors)
+		    {
+			    <li style="color: red;">@error</li>
+		    }
+	    </ul>
+
+        }else{
+              db.Execute( "UPDATE [sandness].[dbo].[user] SET u_mail=@0, u_login=@1 WHERE u_id=@2",  @Request.Form["new_email"],  @Request.Form["new_email"], @u_id  ) ;
+              Session.Remove("username");
+              Response.Redirect("/login/index/?updated_email=email");
+        }
+    } 
+}  
+
+
+
+@if(@Session["username"]!=null &&  ! String.IsNullOrEmpty( @Session["username"].ToString() )){
+  //var login_group = db.QueryValue("Select u_group from [sandness].[dbo].[user] usr,[sandness].[dbo].[usergroup] ug where usr.u_group = ug.ug_id AND  u_login=@0", @Session["username"]);  
+    var login_group = db.QueryValue("Select UserGroupId from [SolaBetong].[dbo].[User] usr,[SolaBetong].[dbo].[UserGroup] ug where usr.UserGroupId = ug.id AND Email=@0", @Session["username"]);  
+    
+  
+  
+    switch( (int) @login_group  ){
+        case 1: 
+            <div id="instillinger">
+                <div class="panel panel-default">
+                    <div class="panel-heading"> <h1 class="panel-title"> @Page.Title</h1></div>
+                    <div class="panel-body"> 
+                         <div>                            
+                             <span class="glyphicon glyphicon-user icon-style"> <a href="~/Administrator/Index"> Administrator </a></span>
+                        </div>
+                        <div>                            
+                             <span class="glyphicon glyphicon-user icon-style"> <a href="~/users/index"> Bruker </a></span>
+                        </div>
+
+                        <div>
+                            
+                             <span class="glyphicon glyphicon-user icon-style"> <a href="~/kunde/Index"> Kunder </a></span>
+                        </div>
+
+                        <div>                            
+                             <span class="glyphicon glyphicon-list"> <a href="~/Byggeplass/index">Byggeplass </a></span>
+                        </div>
+
+                        <div>                            
+                             <span class="glyphicon glyphicon-list"> <a href="~/infopages/Index"> Infopages </a></span>
+                        </div>
+
+                        <div>                            
+                             <span class="glyphicon glyphicon-user icon-style"> <a href="~/roller/Index"> Roller </a></span>
+                        </div>
+
+                        <div>                            
+                             <span class="glyphicon glyphicon-list"> <a href="~/Bestillingsfelter/Index"> Bestillingsfelter </a></span>
+                        </div> 
+                    </div>
+                 </div>
+             </div>
+        
+        break;
+        
+        case 2 :
+           <div id="instillinger">
+               <div class="panel panel-default">
+                    <div class="panel-heading"> <h1 class="panel-title"> @Page.Title</h1></div>
+                    <div class="panel-body"> 
+                         <div>                            
+                            <span class="change_pass_form glyphicon glyphicon-lock">  Password </span>
+                         </div>
+                          <div style="@display" class="change_pass_form1">
+                            <h3> Endre password </h3>
+                              <form method="post">
+                                  <p>
+                                      Nytt passord
+                                  </p>
+                                  <p>
+                                      <input type="text" name="new_passwd">
+                                  </p>
+
+                                  <p>
+                                      Bekreft passord
+                                  </p>
+                                  <p>
+                                      <input type="text" name="con_passwd">
+                                  </p>
+                                  <p class="submit_pass"> <input type="submit" name="submit-pass" value="Endre ditt password"> </p>
+                         
+                              </form>
+                        </div>
+                        <div>                           
+                           <span class="change_email_form glyphicon glyphicon-envelope">  Email </span>
+                        </div>
+                        <div  style ="@display_email" class="change_email_form1">
+                            <h3> Endre e-postadresse </h3>
+                            <form method="POST">
+                                <p>  Nytt e-postadresse </p>
+                                <p>
+                                  <input type="text" name="new_email" value="@Request.Form["new_email"]">
+                                </p>
+                                <p>  Bekreft e-postadresse </p>
+                                <p>
+                                  <input type="text" name="con_email" value="@Request.Form["con_email"]">
+                                </p>
+                                <p class="submit_email"> <input type="submit" name="submit-email" value="Endre ditt e-postadrresse"> </p>
+                            </form>
+
+                        </div>
+                   </div>
+                </div>
+              </div>
+           break;
+
+        case 3:
+        <p> This is for Company</p>
+        break;
+
+        default:
+        break;
+    }
+}
+
+
+

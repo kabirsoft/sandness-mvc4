@@ -1,0 +1,202 @@
+﻿@model sandness_mvc4.Models.Nybestilling.NybestillingViewModel
+@using System.Web.Mvc;
+@using sandness_mvc4.Models.Nybestilling;
+@using sandness_mvc4.Models.Diplo;
+@using System.Collections;
+@using System.Web.Helpers;
+@using NotWebMatrix.Data;
+
+@{      
+    Session.Remove("currentMenu");
+    Session["currentMenu"] = "nybestilling";
+    var db = Database.Open("SolaBetong");
+}
+
+@{  
+    //var getKunde_bygg = ByggeplassRepository.getKunde_bygg(  @Session["username"] );  
+    //var u_proj = db.QueryValue("SELECT u_proj FROM [sandness].[dbo].[user] WHERE u_login=@0", @Session["username"]);
+    
+    //var u_proj = db.QueryValue("SELECT Id,Name FROM [sandness].[dbo].[Project] WHERE u_login=@0", @Session["username"]);
+    //var proObj = new Serializer();
+    //var pro_id = "";
+    //var projects_unserialize_arr = proObj.Deserialize(@u_proj);
+   @*
+    ArrayList proj_ids = new ArrayList(); 
+    try
+    {
+        foreach (var proID in @projects_unserialize_arr)
+        {
+            if (!proID.Equals(null))
+            {
+                proj_ids.Add(@proID);
+            }
+        }
+    }
+    catch (Exception e)
+    {
+
+    }
+    var i = 1;
+    var ids = "0";
+    foreach (var id in proj_ids)
+    {
+        if (@proj_ids.Count == @i)
+        {
+            ids += id;
+        }
+        else
+        {
+            ids += id + ",";
+        }
+
+        i++;
+    }
+    *@    
+    var formUserfields = ByggeplassRepository.getFormUserfield();
+    var UserId = ByggeplassRepository.GetUserId(@Session["username"].ToString() );
+    var proj_names = db.Query("select id,name from [SolaBetong].[dbo].[project] where UserId=@0", @UserId );
+    var get_kunde_name = db.QuerySingle("select cust.Id,cust.Name from [SolaBetong].[dbo].[User] u, [SolaBetong].[dbo].[Customer] cust Where u.CustomerId = cust.Id and u.Id=@0", @UserId);
+    var KundeName = "";
+    var KundeId = 0;
+    try{
+        KundeName = @get_kunde_name.Name;
+        KundeId = @get_kunde_name.Id;
+    }catch(Exception ex){}
+    
+    
+    
+                    /* foreach (var field in formUserfields)
+                     {                            
+                           <p>@field.id - @field.type -  @field.name - @field.ord  </p>
+                     * }*/
+   using (Html.BeginForm("Index", "Nybestilling", FormMethod.Post, new { id = "nybestilling_form" , role="form"} ) ) 
+   {       
+        <div class="panel panel-default">
+              <div class="panel-heading"> <h1 class="panel-title"> Nybestilling</h1></div>
+           <div class="panel-body">      
+		      <div class="container">
+                    <div class="row">
+                         <div class="form-group">
+                            <label class="col-sm-12"> Kunde :  @KundeName </label><span>  </span>
+                             <input type="hidden"  name="CustomerId" value="@KundeId"> 
+                         </div>
+                    </div>
+                    <div class="row">
+                      <div class="form-group form-inline">                                
+                         <label for="project" class="col-sm-2"> Byggeplass </label>                 
+                          <div class="col-sm-10">
+                              <select class="form-control" name="ProjectId" >
+                                     @if ( @proj_names.Count() > 0 )
+                                     {
+                                         foreach (var pro in @proj_names)
+                                         {                                          
+				                            <option value="@pro.Id" >@pro.Name </option>         
+                                         }
+                                     }                      
+			                   </select>  
+                           </div> 
+                      </div>
+                    </div>
+
+                     <div class="row">
+                         <div class="form-group form-inline">                             
+                             @Html.LabelFor(p => p.DeliveryDate, new { Class="col-sm-2"})  
+                             <div class="col-sm-10">                                                                
+                                 @Html.TextBoxFor(m => m.DeliveryDate, new {Class="form-control", Name="DeliveryDate", Id="date3"})             
+                              </div>            
+                         </div>
+                     </div>
+                
+                     <div class="row">			
+                         <div class="form-group form-inline">			                
+                             @Html.LabelFor(p => p.DeliveryTime, new { Class="col-sm-2"}) 					
+                             <div class="col-sm-10">		                         
+                                 @Html.TextBoxFor(m => m.DeliveryTime, new { Class="form-control", Name="DeliveryTime", Id="khour" })	(eks. 12,30)	
+                              </div>
+                         </div>
+	                  </div>
+                                @foreach (var field in formUserfields)
+                                {
+                                    //<p> type: @field.type </p>
+                                    switch ((int)@field.type)
+                                    {
+                                        case 1: 
+                                            <div class="row">
+                                              <div class="form-group form-inline">
+                                                <label class="col-sm-2"> @field.name </label>
+                                                  <div class="col-sm-10">
+                                                        <input  class="form-control" type="text" name="values_@field.id"/>                                                        
+                                                   </div>
+                                              </div>
+                                            </div>
+                                            break;
+
+                                        case 2:
+                                            var get_drop = db.Query("SELECT * FROM dropdowns WHERE did=@0 ORDER BY Ord DESC", @field.id);
+                               
+                                           <div class="row">
+                                              <div class="form-group form-inline">
+                                                <label> @field.name </label>                              
+                                                <select name="values_@field.id" class="form-control">
+                                                   <option value='-1'> - Select -  </option>    
+                                                     @foreach (var ds in get_drop)
+                                                     {                                
+                                                     <option value='@ds.id'  > @ds.name </option>                                                                
+                                                     }  
+                                               </select>
+                                              </div>
+                                            </div>                              
+                                                     break;
+
+                                        case 3:
+                                                     var get_radio = db.Query("SELECT * FROM choices WHERE feltid=@0 ORDER BY Ord DESC", @field.id);
+                                         <div class="row">
+                                           <div class="form-group form-inline">                                   
+                                                <label class="col-sm-2"> @field.name </label>
+                                                <div class="col-sm-10">
+                                                    @foreach (var rs in get_radio)
+                                                    {                                
+                                                     <span><input class="form-control" type='radio'  name='values_@field.id' value='@rs.id' style="width: 20px;height:21px;" /> @rs.name </span>
+                                                    }
+                                                </div>                                   
+                                            </div>
+                                        </div>                              
+                                                    break;
+
+                                        default:
+                                                    break;
+                                    }
+                                }
+                              
+
+                               <div class="row">
+                                 <div class="form-group form-inline">                                    
+                                      @Html.LabelFor(p => p.Lmin, new { Class="col-sm-2"})                     
+                                     <div class="col-sm-10">                                            
+                                             @Html.TextBoxFor(m => m.Lmin, new {Class="form-control"}) minutter
+                                      </div>
+                                 </div>
+                               </div>
+                    
+                   
+                            <div class="row">
+                               <div class="form-group form-inline">                                    
+                                       @Html.LabelFor(p => p.Note, new { Class="col-sm-2" })                   
+                                   <div class="col-sm-10">                                        
+                                       @Html.TextAreaFor(m => m.Note, new { Class = "form-control"})                             
+                                   </div>
+                               </div>
+                            </div>                    
+            
+                        <div class="row">
+		                    <div class="form-group form-inline col-sm-12">
+			                    <input type="submit" name="submit-button" value="Lagre bestilling" class="btn btn-default" />                                                                
+		                    </div>
+                        </div>
+              </div> <!-- end container--> 
+           </div> <!-- end panel body-->
+        </div>  <!-- end panel-->
+   }
+    <!-- /form -->          
+  
+}

@@ -1,0 +1,244 @@
+﻿@using System.Web.Mvc;
+@using Conversive.PHPSerializationLibrary;
+@using System.Web.Helpers;
+@using System.Collections;
+@using sandness_mvc4.Models.Diplo;
+@using sandness_mvc4.Models.users;
+@using NotWebMatrix.Data;
+
+@{    
+    Page.Title = "Endre bruker";
+    var db = Database.Open("SolaBetong");
+}
+
+@*
+<div id="endre_bruker"> 
+    @{
+	    bool isPostBack = !String.IsNullOrEmpty(Request.Form["submit-button"]);
+	    var formModel = new edit_userFormModel();
+
+	    if (!isPostBack)
+	    {         
+		    Session.Remove(edit_userFormModel.SessionKey);	                              
+                @RenderForm(formModel)           
+	    }
+	    else
+	    {
+		    if (Session[edit_userFormModel.SessionKey] != null)
+		    {
+			    @DisplayResubmissionError()
+			    return;
+		    }
+            
+		    formModel = new edit_userFormModel(Request.Form);
+            int email_check = db.QueryValue("Select count(u_mail) from [sandness].[dbo].[user] where u_login= @0 and u_id !=@1", @formModel.u_mail, ViewBag.ID);
+		    var errors = formModel.Validate(email_check);
+
+		    if (errors.Count > 0)
+		    {	
+			    @DisplayErrors(errors)
+			    @RenderForm(formModel)
+		    }
+		    else
+		    {
+                // Update database
+
+                @DisplayCompletionMessage(formModel);
+               /*
+                <p>ID: @UrlData[0] </p>
+                <p> Fname: @formModel.u_fname </p>               
+                 <p> Lname: @formModel.u_lname </p>               
+                <p> email: @formModel.u_mail   </p>
+                <p> tele: @formModel.u_phone </p>
+                <p> group : @formModel.u_group</p>
+                <p> company : @formModel.u_company_name </p>
+                <p> pass: @formModel.u_pass </p>                
+                <p> Roll : @formModel.u_rolle </p>               
+                 */
+               var  edit_company_name = db.QueryValue("Select u_company_name from [sandness].[dbo].[user] where u_adminid= @0",@formModel.u_company_name);
+               //<p> @formModel.u_company_name</p>
+                //<p> @edit_company_name</p>
+               ArrayList projectIDs = new ArrayList();
+               foreach(var i in Request.Form.AllKeys)
+               {
+                  if(@i.Length > 7){
+                    if(@i.Substring(0,8) == "project_"){
+                      projectIDs.Add(@Request[@i]);
+                    }
+                  }
+               }
+               
+               var pro_serielize_obj = new Serializer();
+               var u_proj = pro_serielize_obj.Serialize(@projectIDs);
+               //<p>project_serielize: @u_proj</p>
+               db.Execute("UPDATE [sandness].[dbo].[user] SET u_fname =  @0, u_lname=@1, u_mail =@2, u_phone = @3, u_group = @4, u_company_name = @5, u_pass=@6, u_rolle=@7,u_proj=@8  WHERE u_id = @9", @formModel.u_fname, @formModel.u_lname, @formModel.u_mail, @formModel.u_phone, @formModel.u_group, @edit_company_name, @formModel.u_pass, @formModel.u_rolle, @u_proj, ViewBag.ID);
+               <span style="margin-left: 295px;"> <input type="button" value="backto users" onclick="window.location.href = '/users/users'" > </span> 
+            }
+	    }
+    }
+  </div>
+*@
+@{    
+    var  userID = ViewBag.ID;
+	var kunde_user = db.QuerySingle("Select * from [SolaBetong].[dbo].[user] where u_id= @0",userID);
+    var user_adminid = @kunde_user.u_adminid; 
+    //var usergroup = db.Query("Select * from usergroup");  
+    var usergroup = ByggeplassRepository.getUserGroup();
+    var selected ="";  
+
+    var kunder = db.Query("SELECT distinct u_company_name, u_adminid  FROM [SolaBetong].[dbo].[user]");
+    
+    var roller = ByggeplassRepository.getrolle();
+    var projects = db.Query("SELECT id, uid,name FROM projects where uid = @0", user_adminid);
+    
+                 
+    var kunde_projects =  @kunde_user.u_proj;
+    var proObj = new Serializer();         
+    var projects_unserialize_arr = proObj.Deserialize(kunde_projects);
+
+
+<form id="contactForm1" action="" method="post">
+		<fieldset>
+			<legend>Endre bruker</legend>
+             <dl>
+				<dt>
+					<label for="u_fname">Fornavn*</label>
+				</dt>
+				<dd>
+					<input type="text" id="u_fname" class="required" name="u_fname" value="@kunde_user.u_fname" maxlength="255" />
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="u_lname">Etternavn*</label>
+				</dt>
+				<dd>
+					<input type="text" id="u_lname" class="required" name="u_lname" value="@kunde_user.u_lname" maxlength="255" />
+				</dd>
+			</dl>
+			
+			<dl>
+				<dt>
+					<label for="u_mail">E-post*</label>
+				</dt>
+				<dd>
+					<input type="email" id="u_mail" class="required u_mail" name="u_mail" value="@kunde_user.u_mail" maxlength="255" />
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="u_phone">Mobiltelefon*</label>
+				</dt>
+				<dd>
+					<input type="text" id="u_phone" class="required u_phone" name="u_phone" value="@kunde_user.u_phone" maxlength="255" />
+				</dd>
+			</dl>
+            
+            <dl>
+				<dt>
+					<label for="u_group">Gruppe</label>
+				</dt>
+				<dd>
+					<select id="u_group" name="u_group">
+                         						
+						@foreach (var group in usergroup)
+						{
+                            if( @kunde_user.u_group == group.ug_id){  
+                                selected = "selected"; 
+                                }else{
+                                    selected = "";
+                                }
+							<option value="@group.ug_id" @selected>@group.ug_name</option>
+						}
+					</select>
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="u_company_name">Kunder</label>
+				</dt>
+				<dd>
+					<select id="u_company_name" name="u_company_name">
+                         						
+						@foreach (var kundesql in kunder)
+						{
+                            if( @kunde_user.u_adminid == @kundesql.u_adminid){  
+                                selected = "selected"; 
+                                }else{
+                                    selected = "";
+                                }
+							<option value="@kundesql.u_adminid" @selected> @kundesql.u_company_name</option> 
+						}
+					</select>
+				</dd>
+			</dl>			
+			
+             <dl>
+				<dt>
+					<label for="project">Projekter</label>
+				</dt>
+				<dd>
+
+				    @foreach (var project in projects){
+                        var checked_pro="";
+                        if(@projects_unserialize_arr !=null){
+                        foreach(var proID in projects_unserialize_arr){
+                            
+                            if(@project.id ==  Convert.ToInt32(@proID)){
+                                   checked_pro = "checked";
+                                   break;    
+                            }
+                         }
+                        }
+                    
+                     <input type="checkbox" @checked_pro id="project_@project.id"  name="project_@project.id" value=@project.id maxlength="255"> @project.name <br />
+				
+                    }
+                </dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="u_pass">Passord*</label>
+				</dt>
+				<dd>
+					<input type="password" id="u_pass" class="required" name="u_pass" value="" maxlength="255" />
+				</dd>
+			</dl>
+
+            <dl>
+				<dt>
+					<label for="con_password">Gjenta Passord*</label>
+				</dt>
+				<dd>
+					<input type="password" id="con_password" class="required" name="con_password" value="" maxlength="255" />
+				</dd>
+			</dl>
+            <dl>
+				<dt>
+					<label for="u_rolle">Rolle</label>
+				</dt>
+				<dd>
+					<select id="u_rolle" name="u_rolle">
+                         						
+						@foreach (var rollesql in roller)
+						{
+                            if( @kunde_user.u_rolle == rollesql.id){  
+                                selected = "selected"; 
+                                }else{
+                                    selected = "";
+                                }
+							<option value="@rollesql.id" @selected> @rollesql.name</option>
+						}
+					</select>
+				</dd>
+			</dl>
+		</fieldset>
+		<div>
+			<input type="submit" name="submit-button" value="Submit" class="button" />
+		</div>
+	</form>
+}
